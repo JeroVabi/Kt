@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Little World 🌍</title>
+    <style>
+        :root {
+            --bg-deep: #090a10;
+            --bg-card: rgba(23, 25, 38, 0.72);
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --border-glass: rgba(255, 255, 255, 0.12);
+            --accent-glow: #e06cdb;
+            --accent-warm: #ff8e6e;
+            --accent-blue: #64b5f6;
+            --accent-gold: #ffd166;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #starCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 80vh;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, rgba(236, 72, 153, 0.08) 40%, rgba(9, 10, 16, 0) 75%);
+            pointer-events: none;
+            z-index: 2;
+            transition: background 1.2s ease;
+        }
+
+        /* Top Persistent Navigation & Tracker */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 50;
+            pointer-events: auto;
+        }
+
+        .brand-title {
+            font-size: 0.95rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .discovery-badge {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            padding: 0.4rem 0.9rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .discovery-badge.discovered {
+            border-color: rgba(255, 209, 102, 0.4);
+            color: var(--accent-gold);
+            box-shadow: 0 0 15px rgba(255, 209, 102, 0.2);
+        }
+
+        /* Scene Master Container */
+        #viewport {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            z-index: 10;
+        }
+
+        .scene-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+            transition: opacity 0.85s cubic-bezier(0.4, 0, 0.2, 1), transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(0.97) translateY(12px);
+            padding: 2rem 1.5rem;
+        }
+
+        .scene-container.active {
+            opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
+            transform: scale(1) translateY(0);
+        }
+
+        .landing-card {
+            max-width: 680px;
+            text-align: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            padding: 3.5rem 2.5rem;
+            border-radius: 28px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(168, 85, 247, 0.15);
+            animation: floatSlow 6s ease-in-out infinite;
+        }
+
+        .landing-title {
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 30%, #e06cdb 75%, #ff8e6e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.25rem;
+            line-height: 1.15;
+        }
+
+        .landing-sub {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .landing-hint {
+            font-size: 0.95rem;
+            color: var(--accent-gold);
+            font-weight: 500;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+        }
+
+        /* Cinematic Primary Action Buttons */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            color: #ffffff;
+            border: none;
+            padding: 1rem 2.4rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            border-radius: 9999px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(236, 72, 153, 0.35);
+            transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 14px 40px rgba(236, 72, 153, 0.5);
+        }
+
+        .btn-action:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* Scene Stage Layout */
+        .stage-box {
+            width: 100%;
+            max-width: 900px;
+            height: min(600px, 78vh);
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 28px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.75rem 2rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+        }
+
+        .stage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .scene-counter {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .scene-tag {
+            font-size: 0.75rem;
+            color: var(--accent-glow);
+            border: 1px solid rgba(224, 108, 219, 0.3);
+            background: rgba(224, 108, 219, 0.08);
+            padding: 0.3rem 0.8rem;
+            border-radius: 9999px;
+            letter-spacing: 0.08em;
+        }
+
+        .stage-canvas-area {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        /* Bottom Controls */
+        .stage-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+            margin-top: auto;
+        }
+
+        .btn-next {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-glass);
+            color: #ffffff;
+            padding: 0.7rem 1.6rem;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-next:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateX(3px);
+        }
+
+        /* Secret item subtle cue */
+        .secret-trigger {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .secret-trigger:hover {
+            filter: drop-shadow(0 0 8px rgba(255, 209, 102, 0.7));
+        }
+
+        .secret-word-embed {
+            font-size: 9px;
+            letter-spacing: 0.22em;
+            opacity: 0.45;
+            text-transform: uppercase;
+            font-weight: 700;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .secret-found-toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(25, 28, 44, 0.95);
+            border: 1px solid rgba(255, 209, 102, 0.4);
+            color: var(--accent-gold);
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(16px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            pointer-events: none;
+        }
+
+        .secret-found-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Scene 01 Elements */
+        .scene1-bench-ground {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .scene-bench {
+            width: 320px;
+            height: 16px;
+            background: #2a2c3d;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .scene-bench::before, .scene-bench::after {
+            content: '';
+            position: absolute;
+            bottom: -35px;
+            width: 12px;
+            height: 35px;
+            background: #1b1c28;
+            border-radius: 4px;
+        }
+        .scene-bench::before { left: 40px; }
+        .scene-bench::after { right: 40px; }
+
+        /* Dialog Floating Cards */
+        .dialogue-wrapper {
+            position: absolute;
+            top: 22%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.9rem;
+            width: 100%;
+            padding: 0 1rem;
+            z-index: 15;
+        }
+
+        .dialogue-bubble {
+            background: rgba(30, 33, 50, 0.9);
+            border: 1px solid var(--border-glass);
+            border-radius: 18px;
+            padding: 0.75rem 1.4rem;
+            max-width: 85%;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            color: #ffffff;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .dialogue-bubble.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .bubble-boy {
+            align-self: flex-start;
+            margin-left: 10%;
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .bubble-girl {
+            align-self: flex-end;
+            margin-right: 10%;
+            border-right: 3px solid var(--accent-glow);
+        }
+
+        /* Snack package & wrapper illustration */
+        .snack-bag {
+            width: 60px;
+            height: 75px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 8px 8px 12px 12px;
+            position: absolute;
+            top: -55px;
+            right: 80px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .snack-bag:hover {
+            transform: scale(1.08) rotate(4deg);
+        }
+
+        .snack-tag-line {
+            font-size: 8px;
+            color: #fff;
+            letter-spacing: 0.15em;
+            margin-top: 4px;
+            font-weight: 700;
+            opacity: 0.75;
+        }
+
+        /* Scene 02 Scooty & Road */
+        .road-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 140px;
+            background: #12131c;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .road-line {
+            width: 200%;
+            height: 6px;
+            background: repeating-linear-gradient(90deg, #ffd166 0px, #ffd166 40px, transparent 40px, transparent 80px);
+            animation: roadMove 2s linear infinite;
+        }
+
+        @keyframes roadMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-80px); }
+        }
+
+        .scooty-unit {
+            position: absolute;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: scootyBob 1.6s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        @keyframes scootyBob {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        .milestone-sign {
+            position: absolute;
+            bottom: 60px;
+            right: 40px;
+            width: 48px;
+            height: 70px;
+            background: #e2e8f0;
+            border-radius: 20px 20px 4px 4px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 10px;
+            cursor: pointer;
+            z-index: 12;
+            transition: transform 0.25s ease;
+        }
+
+        .milestone-sign:hover {
+            transform: scale(1.1);
+        }
+
+        .milestone-top {
+            width: 32px;
+            height: 10px;
+            background: #ef4444;
+            border-radius: 10px 10px 0 0;
+            margin-top: -6px;
+        }
+
+        .milestone-text {
+            font-size: 7px;
+            font-weight: 800;
+            color: #1e293b;
+            letter-spacing: 0.12em;
+            margin-top: 10px;
+        }
+
+        .sunset-disc {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(251, 146, 60, 0.45) 0%, rgba(244, 63, 94, 0.15) 60%, transparent 75%);
+            filter: blur(12px);
+            pointer-events: none;
+        }
+
+        /* Scene 03 Conversations */
+        .chat-flow-box {
+            width: 100%;
+            max-width: 620px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+            z-index: 12;
+            margin-top: 1rem;
+        }
+
+        .chat-item {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            padding: 0.8rem 1.25rem;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            max-width: 80%;
+            backdrop-filter: blur(14px);
+        }
+
+        .chat-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .chat-item.left {
+            align-self: flex-start;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-item.right {
+            align-self: flex-end;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.4));
+            border: 1px solid rgba(236, 72, 153, 0.25);
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-verdict {
+            text-align: center;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #ffd166;
+            margin-top: 1.2rem;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.7s ease;
+        }
+
+        .chat-verdict.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .constellation-wrapper {
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            cursor: pointer;
+            z-index: 15;
+            padding: 8px;
+        }
+
+        /* Scene 04 Little Things */
+        .notif-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+            max-width: 440px;
+            z-index: 10;
+        }
+
+        .notif-card {
+            background: rgba(28, 32, 48, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 0.9rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        }
+
+        .notif-card.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notif-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .notif-content {
+            flex-grow: 1;
+        }
+
+        .notif-sender {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent-glow);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .notif-text {
+            font-size: 0.9rem;
+            color: #f1f5f9;
+            margin-top: 2px;
+        }
+
+        .notif-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .thought-reflection {
+            text-align: center;
+            margin-top: 1.5rem;
+            max-width: 520px;
+            z-index: 12;
+        }
+
+        .thought-line1 {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .thought-line2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ffd166;
+            margin-top: 0.4rem;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        /* Tiny badge hiding TREASURE */
+        .app-settings-badge {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.25s ease;
+        }
+
+        .app-settings-badge:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 209, 102, 0.3);
+        }
+
+        /* Scene 05 One Person */
+        .memory-walk-stage {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .crowd-shadows {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            pointer-events: none;
+            transition: opacity 1.5s ease;
+        }
+
+        .silhouette {
+            width: 45px;
+            height: 120px;
+            background: #1b1e2c;
+            border-radius: 20px 20px 0 0;
+            opacity: 0.35;
+            filter: blur(1.5px);
+            animation: figureFade 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes figureFade {
+            0% { opacity: 0.15; transform: scaleY(0.95); }
+            100% { opacity: 0.4; transform: scaleY(1.02); }
+        }
+
+        .protagonist-meeting {
+            position: relative;
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            gap: 3.5rem;
+            transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .character-art {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .char-head {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #ffd3b6;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .char-hair-boy {
+            position: absolute;
+            top: -4px;
+            width: 52px;
+            height: 26px;
+            background: #2d3748;
+            border-radius: 24px 24px 6px 6px;
+        }
+
+        .char-hair-girl {
+            position: absolute;
+            top: -4px;
+            width: 54px;
+            height: 42px;
+            background: #4a2e2b;
+            border-radius: 26px 26px 20px 20px;
+        }
+
+        .char-smile {
+            width: 14px;
+            height: 7px;
+            border-bottom: 2.5px solid #be185d;
+            border-radius: 0 0 10px 10px;
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .char-body-boy {
+            width: 58px;
+            height: 90px;
+            background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+            border-radius: 16px 16px 6px 6px;
+            margin-top: -2px;
+        }
+
+        .char-body-girl {
+            width: 54px;
+            height: 90px;
+            background: linear-gradient(180deg, #ec4899, #db2777);
+            border-radius: 16px 16px 6px 6px;
+            margin-top: -2px;
+        }
+
+        .polaroid-frame {
+            position: absolute;
+            bottom: 25px;
+            right: 35px;
+            background: #f8fafc;
+            padding: 8px 8px 24px 8px;
+            border-radius: 8px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+            transform: rotate(-6deg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 18;
+        }
+
+        .polaroid-frame:hover {
+            transform: rotate(0deg) scale(1.1);
+        }
+
+        .polaroid-photo {
+            width: 80px;
+            height: 80px;
+            background: #1e293b;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+        }
+
+        .polaroid-caption {
+            font-size: 6px;
+            color: #64748b;
+            margin-top: 6px;
+            text-align: center;
+            font-family: "Courier New", Courier, monospace;
+            font-weight: 700;
+        }
+
+        /* Bridge Pre-Reveal Card */
+        .bridge-message {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: rgba(9, 10, 16, 0.94);
+            backdrop-filter: blur(25px);
+            z-index: 35;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+            padding: 2rem;
+        }
+
+        .bridge-message.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Reveal Sequence Screen */
+        #revealScreen {
+            position: fixed;
+            inset: 0;
+            background: #06070a;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+            transition: opacity 1s ease;
+            padding: 2rem;
+        }
+
+        #revealScreen.active {
+            opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
+        }
+
+        .words-cascade {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 2.5rem;
+        }
+
+        .reveal-word-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: clamp(1.4rem, 4vw, 2.2rem);
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: #64748b;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .reveal-word-row.revealed {
+            opacity: 1;
+            transform: translateY(0);
+            color: #ffffff;
+        }
+
+        .reveal-word-row .initial-letter {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-gold);
+            font-weight: 900;
+            transition: all 0.5s ease;
+        }
+
+        .reveal-word-row.highlighted .initial-letter {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: #ffffff;
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.6);
+            transform: scale(1.15);
+        }
+
+        /* Final KUTTU Title Reveal */
+        .kuttu-banner {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: clamp(2.8rem, 8vw, 4.8rem);
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            color: #ffffff;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: scale(0.85);
+            transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .kuttu-banner.shown {
+            opacity: 1;
+            transform: scale(1);
+            text-shadow: 0 0 35px rgba(236, 72, 153, 0.5);
+        }
+
+        .heart-beat {
+            display: inline-block;
+            color: #ef4444;
+            animation: pulseGlow 1.8s infinite ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.4)); }
+            50% { transform: scale(1.2); filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.8)); }
+        }
+
+        /* Acronym breakdown card */
+        .acronym-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            padding: 1.5rem 2.5rem;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.7s ease;
+        }
+
+        .acronym-breakdown.shown {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .acronym-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.05rem;
+            letter-spacing: 0.05em;
+        }
+
+        .acronym-key {
+            font-weight: 800;
+            color: var(--accent-gold);
+            font-size: 1.2rem;
+            width: 24px;
+        }
+
+        .acronym-val {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Final Dedication Note Screen */
+        #finalScreen {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, #151424 0%, #090a10 75%);
+            z-index: 110;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+            transition: opacity 1.2s ease;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+
+        #finalScreen.active {
+            opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
+        }
+
+        .final-card {
+            max-width: 650px;
+            background: rgba(25, 27, 42, 0.75);
+            border: 1px solid var(--border-glass);
+            border-radius: 32px;
+            padding: 3rem 2.2rem;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(224, 108, 219, 0.15);
+            backdrop-filter: blur(20px);
+            position: relative;
+        }
+
+        .final-title {
+            font-size: clamp(1.4rem, 3.5vw, 2rem);
+            font-weight: 700;
+            line-height: 1.4;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+        }
+
+        .final-quote {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .final-stamp {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+            letter-spacing: 0.08em;
+            margin-bottom: 2.2rem;
+        }
+
+        .btn-restart {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-secondary);
+            padding: 0.8rem 1.8rem;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-restart:hover {
+            border-color: #ffffff;
+            color: #ffffff;
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Floating Animation Keyframes */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Responsiveness & mobile adaptations */
+        @media (max-width: 640px) {
+            .top-bar { padding: 1rem; }
+            .landing-card { padding: 2rem 1.5rem; }
+            .stage-box { padding: 1.25rem 1rem; height: 82vh; }
+            .dialogue-wrapper { top: 16%; }
+            .dialogue-bubble { font-size: 0.88rem; max-width: 92%; }
+            .chat-item { font-size: 0.88rem; max-width: 90%; }
+            .protagonist-meeting { gap: 2rem; }
+            .final-card { padding: 2rem 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="starCanvas"></canvas>
+    <div class="ambient-glow" id="ambientGlow"></div>
+
+    <!-- Persistent Top Bar -->
+    <header class="top-bar">
+        <div class="brand-title">
+            <span>Our Little World</span>
+            <span style="font-size: 1.1rem;">🌍</span>
+        </div>
+        <div class="discovery-badge" id="discoveryBadge">
+            <span id="badgeIcon">👀</span>
+            <span id="badgeText">Secrets found: 0 / 5</span>
+        </div>
+    </header>
+
+    <!-- Floating Feedback Toast -->
+    <div class="secret-found-toast" id="secretToast">
+        <span>✨</span>
+        <span id="toastMsg">You noticed a little detail...</span>
+    </div>
+
+    <main id="viewport">
+        <!-- 0. Landing Opening Screen -->
+        <section class="scene-container active" id="sceneLanding">
+            <div class="landing-card">
+                <h1 class="landing-title">WELCOME TO OUR WORLD 🌍</h1>
+                <p class="landing-sub">
+                    Some stories are meant to be read.<br>
+                    Some are meant to be remembered.<br>
+                    But this one has a few secrets hidden inside.
+                </p>
+                <p class="landing-hint">You may find the secrets... 👀</p>
+                <button class="btn-action" id="btnStartExplore">
+                    <span>EXPLORE</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="scene-container" id="scene1">
+            <div class="stage-box">
+                <div class="stage-header">
+                    <span class="scene-counter">01 / 05</span>
+                    <span class="scene-tag">The Snack</span>
+                </div>
+
+                <div class="stage-canvas-area">
+                    <!-- Dialogue sequence -->
+                    <div class="dialogue-wrapper">
+                        <div class="dialogue-bubble bubble-boy" id="s1b1">Boy: “For me?”</div>
+                        <div class="dialogue-bubble bubble-girl" id="s1b2">Girl: “Obviously. Take it. 😂”</div>
+                        <div class="dialogue-bubble bubble-boy" id="s1b3">Boy smiles and accepts.</div>
+                    </div>
+
+                    <!-- Ground & Bench Atmosphere -->
+                    <div class="scene1-bench-ground">
+                        <div class="scene-bench">
+                            <!-- Boy seated on bench -->
+                            <div style="position: absolute; bottom: 16px; left: 60px; display: flex; flex-direction: column; align-items: center;">
+                                <div class="char-head">
+                                    <div class="char-hair-boy"></div>
+                                </div>
+                                <div class="char-body-boy" style="height: 65px; width: 48px;"></div>
+                            </div>
+
+                            <!-- Girl standing nearby with snacks -->
+                            <div style="position: absolute; bottom: 16px; right: 70px; display: flex; flex-direction: column; align-items: center;">
+                                <div class="char-head">
+                                    <div class="char-hair-girl"></div>
+                                    <div class="char-smile"></div>
+                                </div>
+                                <div class="char-body-girl" style="height: 75px; width: 46px;"></div>
+
+                                <!-- Snack bag with secret KIND -->
+                                <div class="snack-bag secret-trigger" id="secretKind" title="Examine the snack package">
+                                    <span style="font-size: 1.1rem;">🍟</span>
+                                    <span class="snack-tag-line">CRUNCH</span>
+                                    <span class="secret-word-embed" style="color: #fff; margin-top: 2px;">KIND</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stage-footer">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Look closely at what she's holding...</span>
+                    <button class="btn-next" onclick="app.goToScene(2)">
+                        <span>Next Memory</span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="scene-container" id="scene2">
+            <div class="stage-box">
+                <div class="stage-header">
+                    <span class="scene-counter">02 / 05</span>
+                    <span class="scene-tag">The Scooty</span>
+                </div>
+
+                <div class="stage-canvas-area">
+                    <div class="sunset-disc"></div>
+
+                    <!-- Dialogue -->
+                    <div class="dialogue-wrapper" style="top: 15%;">
+                        <div class="dialogue-bubble bubble-girl show">Girl: “Come. 🚀”</div>
+                        <div class="dialogue-bubble bubble-boy show" style="margin-top: 4px;">Boy hops on without a second thought.</div>
+                    </div>
+
+                    <!-- Scooty SVG with boy & girl riding -->
+                    <div class="scooty-unit">
+                        <svg width="200" height="130" viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Wind streaks -->
+                            <path d="M5 40 Q25 40 45 40" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linecap="round" />
+                            <path d="M-15 55 Q15 55 35 55" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round" />
+                            <!-- Scooty body -->
+                            <circle cx="55" cy="100" r="18" fill="#334155" stroke="#94a3b8" stroke-width="4"/>
+                            <circle cx="155" cy="100" r="18" fill="#334155" stroke="#94a3b8" stroke-width="4"/>
+                            <path d="M55 100 L85 100 L115 85 L145 85 L155 100" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M145 85 L135 48 L125 48" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round"/>
+                            <path d="M90 85 L115 85" stroke="#1e293b" stroke-width="12" stroke-linecap="round"/>
+                            <!-- Girl Driver silhouette -->
+                            <circle cx="118" cy="40" r="13" fill="#ffd3b6"/>
+                            <path d="M106 32 C106 20 130 20 130 32 Z" fill="#4a2e2b"/>
+                            <path d="M108 52 C108 52 118 48 126 52 L128 75 L110 75 Z" fill="#ec4899"/>
+                            <!-- Boy Rider silhouette -->
+                            <circle cx="92" cy="42" r="12" fill="#ffd3b6"/>
+                            <path d="M82 35 C82 25 102 25 102 35 Z" fill="#1e293b"/>
+                            <path d="M84 54 C84 54 92 50 100 54 L102 75 L86 75 Z" fill="#3b82f6"/>
+                            <!-- Headlight beam -->
+                            <polygon points="160,50 210,35 210,68" fill="rgba(255, 230, 150, 0.18)" />
+                        </svg>
+                    </div>
+
+                    <!-- Milestone roadside sign hiding UNIQUE -->
+                    <div class="milestone-sign secret-trigger" id="secretUnique" title="Check the road marker">
+                        <div class="milestone-top"></div>
+                        <span style="font-size: 8px; color: #64748b; font-weight: 700; margin-top: 4px;">KM 24</span>
+                        <span class="milestone-text">ROUTE</span>
+                        <span class="secret-word-embed" style="color: #0f172a; margin-top: 2px;">UNIQUE</span>
+                    </div>
+
+                    <!-- Road -->
+                    <div class="road-container">
+                        <div class="road-line"></div>
+                    </div>
+                </div>
+
+                <div class="stage-footer">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Unplanned rides make the happiest memories.</span>
+                    <button class="btn-next" onclick="app.goToScene(3)">
+                        <span>Next Memory</span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="scene-container" id="scene3">
+            <div class="stage-box">
+                <div class="stage-header">
+                    <span class="scene-counter">03 / 05</span>
+                    <span class="scene-tag">The Conversations</span>
+                </div>
+
+                <div class="stage-canvas-area" style="flex-direction: column; justify-content: center;">
+                    <!-- Subtle Constellation hiding TRUST -->
+                    <div class="constellation-wrapper secret-trigger" id="secretTrust" title="Gaze at the stars">
+                        <svg width="80" height="50" viewBox="0 0 80 50">
+                            <line x1="10" y1="35" x2="30" y2="12" stroke="rgba(255,255,255,0.4)" stroke-width="1" stroke-dasharray="2,2"/>
+                            <line x1="30" y1="12" x2="55" y2="25" stroke="rgba(255,255,255,0.4)" stroke-width="1" stroke-dasharray="2,2"/>
+                            <line x1="55" y1="25" x2="70" y2="10" stroke="rgba(255,255,255,0.4)" stroke-width="1" stroke-dasharray="2,2"/>
+                            <circle cx="10" cy="35" r="3" fill="#ffd166"/>
+                            <circle cx="30" cy="12" r="3" fill="#ffffff"/>
+                            <circle cx="55" cy="25" r="3" fill="#ffffff"/>
+                            <circle cx="70" cy="10" r="3.5" fill="#ffd166"/>
+                            <text x="25" y="44" fill="rgba(255,255,255,0.3)" font-size="8" letter-spacing="1.5" class="secret-word-embed">TRUST</text>
+                        </svg>
+                    </div>
+
+                    <!-- Conversation bubble montage -->
+                    <div class="chat-flow-box">
+                        <div class="chat-item left" id="c1">“Did you eat?”</div>
+                        <div class="chat-item right" id="c2">“What happened today?”</div>
+                        <div class="chat-item left" id="c3">“I need to tell you something.”</div>
+                        <div class="chat-item right" id="c4">“Listen… don't tell anyone this 😂”</div>
+                        <div class="chat-item left" id="c5">“I have something on my mind.”</div>
+                    </div>
+
+                    <div class="chat-verdict" id="cVerdict">
+                        “With you, I can say everything.”
+                    </div>
+                </div>
+
+                <div class="stage-footer">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Quiet nights, endless honesty.</span>
+                    <button class="btn-next" onclick="app.goToScene(4)">
+                        <span>Next Memory</span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="scene-container" id="scene4">
+            <div class="stage-box">
+                <div class="stage-header">
+                    <span class="scene-counter">04 / 05</span>
+                    <span class="scene-tag">The Little Things</span>
+                </div>
+
+                <div class="stage-canvas-area" style="flex-direction: column; justify-content: center;">
+                    <!-- Notification Stack -->
+                    <div class="notif-stack">
+                        <div class="notif-card" id="n1">
+                            <div class="notif-icon">💬</div>
+                            <div class="notif-content">
+                                <div class="notif-sender">Her</div>
+                                <div class="notif-text">Reached?</div>
+                            </div>
+                            <div class="notif-time">8:14 PM</div>
+                        </div>
+
+                        <div class="notif-card" id="n2">
+                            <div class="notif-icon">🌸</div>
+                            <div class="notif-content">
+                                <div class="notif-sender">Her</div>
+                                <div class="notif-text">Take care. Did you eat?</div>
+                            </div>
+                            <div class="notif-time">9:02 PM</div>
+                        </div>
+
+                        <div class="notif-card" id="n3">
+                            <div class="notif-icon">✨</div>
+                            <div class="notif-content">
+                                <div class="notif-sender">Her</div>
+                                <div class="notif-text">Why are you quiet today? Something wrong?</div>
+                            </div>
+                            <div class="notif-time">10:45 PM</div>
+                        </div>
+
+                        <div class="notif-card" id="n4">
+                            <div class="notif-icon">🤍</div>
+                            <div class="notif-content">
+                                <div class="notif-sender">Her</div>
+                                <div class="notif-text">I'm here. Tell me.</div>
+                            </div>
+                            <!-- Tiny lock badge hiding TREASURE -->
+                            <div class="app-settings-badge secret-trigger" id="secretTreasure" title="Inspect notification metadata">
+                                <span style="font-size: 10px;">🔒</span>
+                                <span class="secret-word-embed">TREASURE</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Boy reflection -->
+                    <div class="thought-reflection">
+                        <p class="thought-line1" id="tLine1">“You probably thought they were small things.”</p>
+                        <p class="thought-line2" id="tLine2">“I didn't.”</p>
+                    </div>
+                </div>
+
+                <div class="stage-footer">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Sometimes care doesn't need to be loud.</span>
+                    <button class="btn-next" onclick="app.goToScene(5)">
+                        <span>Next Memory</span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="scene-container" id="scene5">
+            <div class="stage-box">
+                <div class="stage-header">
+                    <span class="scene-counter">05 / 05</span>
+                    <span class="scene-tag">The One Person</span>
+                </div>
+
+                <div class="stage-canvas-area">
+                    <div class="memory-walk-stage">
+                        <!-- Crowd silhouettes fading into stillness -->
+                        <div class="crowd-shadows" id="crowdLayer">
+                            <div class="silhouette" style="animation-delay: 0.2s;"></div>
+                            <div class="silhouette" style="animation-delay: 0.8s;"></div>
+                            <div class="silhouette" style="animation-delay: 1.4s;"></div>
+                            <div class="silhouette" style="animation-delay: 0.5s;"></div>
+                            <div class="silhouette" style="animation-delay: 1.1s;"></div>
+                        </div>
+
+                        <!-- Boy walking toward Smiling Girl -->
+                        <div class="protagonist-meeting" id="meetingDuo">
+                            <!-- Boy -->
+                            <div class="character-art" id="boyWalk">
+                                <div class="char-head">
+                                    <div class="char-hair-boy"></div>
+                                </div>
+                                <div class="char-body-boy"></div>
+                            </div>
+
+                            <!-- Girl -->
+                            <div class="character-art" id="girlStand">
+                                <div class="char-head">
+                                    <div class="char-hair-girl"></div>
+                                    <div class="char-smile"></div>
+                                </div>
+                                <div class="char-body-girl"></div>
+                            </div>
+                        </div>
+
+                        <!-- Polaroid memory card hiding UNREPLACEABLE -->
+                        <div class="polaroid-frame secret-trigger" id="secretUnreplaceable" title="Look behind the polaroid">
+                            <div class="polaroid-photo">📸</div>
+                            <div class="polaroid-caption">ETERNAL</div>
+                            <div class="secret-word-embed" style="text-align: center; color: #475569; margin-top: 3px;">UNREPLACEABLE</div>
+                        </div>
+                    </div>
+
+                    <!-- Post-Scene 5 Bridge overlay -->
+                    <div class="bridge-message" id="bridgeOverlay">
+                        <h2 style="font-size: 1.8rem; margin-bottom: 0.8rem; font-weight: 700;">You found all five.</h2>
+                        <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2rem;">
+                            But do you know what you actually found? 👀
+                        </p>
+                        <button class="btn-action" id="btnRevealSecret">
+                            <span>REVEAL THE SECRET</span>
+                            <span>✨</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stage-footer">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">In a sea of people, some presence never fades.</span>
+                    <button class="btn-next" id="btnEndStory" onclick="app.showBridge()">
+                        <span>Finish Story</span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="revealScreen">
+        <div class="words-cascade" id="wordsCascade">
+            <div class="reveal-word-row" id="rw0">
+                <span class="initial-letter">K</span>
+                <span>KIND</span>
+            </div>
+            <div class="reveal-word-row" id="rw1">
+                <span class="initial-letter">U</span>
+                <span>UNIQUE</span>
+            </div>
+            <div class="reveal-word-row" id="rw2">
+                <span class="initial-letter">T</span>
+                <span>TRUST</span>
+            </div>
+            <div class="reveal-word-row" id="rw3">
+                <span class="initial-letter">T</span>
+                <span>TREASURE</span>
+            </div>
+            <div class="reveal-word-row" id="rw4">
+                <span class="initial-letter">U</span>
+                <span>UNREPLACEABLE</span>
+            </div>
+        </div>
+
+        <div class="kuttu-banner" id="kuttuBanner">
+            <span>K</span>
+            <span>U</span>
+            <span>T</span>
+            <span>T</span>
+            <span>U</span>
+            <span class="heart-beat">❤️</span>
+        </div>
+
+        <div class="acronym-breakdown" id="acronymBreakdown">
+            <div class="acronym-row"><span class="acronym-key">K</span><span class="acronym-val">— Kind</span></div>
+            <div class="acronym-row"><span class="acronym-key">U</span><span class="acronym-val">— Unique</span></div>
+            <div class="acronym-row"><span class="acronym-key">T</span><span class="acronym-val">— Trust</span></div>
+            <div class="acronym-row"><span class="acronym-key">T</span><span class="acronym-val">— Treasure</span></div>
+            <div class="acronym-row"><span class="acronym-key">U</span><span class="acronym-val">— Unreplaceable</span></div>
+        </div>
+
+        <button class="btn-action" id="btnToFinalMessage" style="margin-top: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.6s;">
+            <span>One More Thing</span>
+            <span>🫶</span>
+        </button>
+    </div>
+
+    <div id="finalScreen">
+        <div class="final-card">
+            <div style="font-size: 2.8rem; margin-bottom: 1rem;">🌍❤️</div>
+            <h2 class="final-title">
+                You thought you were just exploring our memories...<br>
+                <span style="background: linear-gradient(135deg, #e06cdb, #ff8e6e); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    But you were actually discovering what KUTTU means.
+                </span>
+            </h2>
+
+            <p class="final-quote">
+                “Some names are given.<br>
+                Some names are earned.<br>
+                Through every snack shared, every quiet ride, every late confession, and every small checking-in text...”
+            </p>
+
+            <div class="final-stamp">KUTTU is yours. 🫶</div>
+
+            <button class="btn-restart" id="btnRestartStory">
+                <span>Replay Our Story</span>
+                <span>↺</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /*
+         * Synthetic Audio Synthesizer (Vanilla Web Audio API)
+         * Creates warm, organic chimes and cinematic ambient pads with zero external files.
+         */
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                    }
+                }
+            }
+
+            playChime(freq = 520, type = 'sine', duration = 0.8) {
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 1.5, this.ctx.currentTime + duration);
+
+                    gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {
+                    // Audio context safe fallback
+                }
+            }
+
+            playDiscovery() {
+                this.init();
+                this.playChime(440, 'triangle', 0.6);
+                setTimeout(() => this.playChime(660, 'sine', 0.8), 120);
+                setTimeout(() => this.playChime(880, 'sine', 1.0), 240);
+            }
+
+            playPop() {
+                this.init();
+                this.playChime(320, 'sine', 0.25);
+            }
+        }
+
+        const sfx = new SoundFX();
+
+        /*
+         * Particle Atmosphere Engine
+         * Simulates gently floating starlight and soft orbs on a full-viewport canvas.
+         */
+        class Starfield {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                this.createParticles(70);
+                this.animate();
+            }
+
+            resize() {
+                this.width = this.canvas.width = window.innerWidth;
+                this.height = this.canvas.height = window.innerHeight;
+            }
+
+            createParticles(count) {
+                this.particles = [];
+                for (let i = 0; i < count; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.width,
+                        y: Math.random() * this.height,
+                        radius: Math.random() * 1.6 + 0.4,
+                        alpha: Math.random() * 0.7 + 0.2,
+                        speedY: Math.random() * 0.35 + 0.1,
+                        speedX: (Math.random() - 0.5) * 0.2,
+                        pulse: Math.random() * Math.PI
+                    });
+                }
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+                for (let p of this.particles) {
+                    p.pulse += 0.02;
+                    const a = p.alpha + Math.sin(p.pulse) * 0.2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    this.ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0.1, Math.min(1, a))})`;
+                    this.ctx.fill();
+
+                    p.y -= p.speedY;
+                    p.x += p.speedX;
+
+                    if (p.y < 0) p.y = this.height;
+                    if (p.x < 0) p.x = this.width;
+                    if (p.x > this.width) p.x = 0;
+                }
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        class StoryApp {
+            constructor() {
+                this.currentScene = 0;
+                this.discoveredSecrets = new Set();
+                this.totalSecrets = 5;
+                this.secretMap = {
+                    'secretKind': 'KIND',
+                    'secretUnique': 'UNIQUE',
+                    'secretTrust': 'TRUST',
+                    'secretTreasure': 'TREASURE',
+                    'secretUnreplaceable': 'UNREPLACEABLE'
+                };
+
+                this.initDOM();
+                this.initSecretListeners();
+            }
+
+            initDOM() {
+                // Button navigations
+                document.getElementById('btnStartExplore').addEventListener('click', () => {
+                    sfx.init();
+                    sfx.playPop();
+                    this.goToScene(1);
+                });
+
+                document.getElementById('btnRevealSecret').addEventListener('click', () => {
+                    this.startCinematicReveal();
+                });
+
+                document.getElementById('btnToFinalMessage').addEventListener('click', () => {
+                    sfx.playChime(580, 'sine', 1.0);
+                    this.showFinalDedication();
+                });
+
+                document.getElementById('btnRestartStory').addEventListener('click', () => {
+                    this.restart();
+                });
+            }
+
+            initSecretListeners() {
+                Object.keys(this.secretMap).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.discoverSecret(id);
+                        });
+                    }
+                });
+            }
+
+            discoverSecret(id) {
+                const word = this.secretMap[id];
+                if (!word) return;
+
+                const isNew = !this.discoveredSecrets.has(word);
+                this.discoveredSecrets.add(word);
+
+                sfx.playDiscovery();
+                this.showToast(`✨ You noticed: "${word}"`);
+
+                const badge = document.getElementById('discoveryBadge');
+                badge.classList.add('discovered');
+                document.getElementById('badgeText').textContent = `Secrets noticed: ${this.discoveredSecrets.size} / ${this.totalSecrets}`;
+
+                const targetEl = document.getElementById(id);
+                if (targetEl) {
+                    targetEl.style.transform = 'scale(1.2) rotate(-3deg)';
+                    targetEl.style.boxShadow = '0 0 20px rgba(255, 209, 102, 0.8)';
+                    setTimeout(() => {
+                        targetEl.style.transform = '';
+                    }, 500);
+                }
+            }
+
+            showToast(message) {
+                const toast = document.getElementById('secretToast');
+                const msgEl = document.getElementById('toastMsg');
+                msgEl.textContent = message;
+                toast.classList.add('show');
+                clearTimeout(this.toastTimer);
+                this.toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2800);
+            }
+
+            goToScene(index) {
+                sfx.playPop();
+
+                // Hide all active scene containers
+                document.querySelectorAll('.scene-container').forEach(el => el.classList.remove('active'));
+
+                // Target scene
+                const target = document.getElementById(`scene${index}`);
+                if (target) {
+                    target.classList.add('active');
+                    this.currentScene = index;
+                    this.playSceneKeyframes(index);
+                }
+            }
+
+            playSceneKeyframes(index) {
+                if (index === 1) {
+                    // Sequenced dialogue for scene 1
+                    setTimeout(() => document.getElementById('s1b1').classList.add('show'), 600);
+                    setTimeout(() => document.getElementById('s1b2').classList.add('show'), 1600);
+                    setTimeout(() => document.getElementById('s1b3').classList.add('show'), 2600);
+                } else if (index === 3) {
+                    // Late night deep conversations sequence
+                    const msgs = ['c1', 'c2', 'c3', 'c4', 'c5'];
+                    msgs.forEach((id, i) => {
+                        setTimeout(() => {
+                            const el = document.getElementById(id);
+                            if (el) el.classList.add('visible');
+                        }, 500 + i * 900);
+                    });
+                    setTimeout(() => {
+                        const verdict = document.getElementById('cVerdict');
+                        if (verdict) verdict.classList.add('visible');
+                    }, 500 + msgs.length * 900 + 400);
+                } else if (index === 4) {
+                    // Notification montage
+                    const notifs = ['n1', 'n2', 'n3', 'n4'];
+                    notifs.forEach((id, i) => {
+                        setTimeout(() => {
+                            const el = document.getElementById(id);
+                            if (el) el.classList.add('show');
+                        }, 400 + i * 800);
+                    });
+                    setTimeout(() => {
+                        const l1 = document.getElementById('tLine1');
+                        if (l1) l1.style.opacity = '1';
+                    }, 4000);
+                    setTimeout(() => {
+                        const l2 = document.getElementById('tLine2');
+                        if (l2) l2.style.opacity = '1';
+                    }, 5200);
+                } else if (index === 5) {
+                    // Scene 5 Crowd fading away leaving only the two of them
+                    setTimeout(() => {
+                        const crowd = document.getElementById('crowdLayer');
+                        if (crowd) crowd.style.opacity = '0.08';
+                    }, 1200);
+                }
+            }
+
+            showBridge() {
+                // Ensure all five words are registered for the grand reveal even if observant user missed some
+                ['KIND', 'UNIQUE', 'TRUST', 'TREASURE', 'UNREPLACEABLE'].forEach(w => this.discoveredSecrets.add(w));
+                const badge = document.getElementById('discoveryBadge');
+                badge.classList.add('discovered');
+                document.getElementById('badgeText').textContent = `Secrets discovered: 5 / 5`;
+
+                sfx.playChime(600, 'sine', 0.9);
+                const bridge = document.getElementById('bridgeOverlay');
+                bridge.classList.add('active');
+            }
+
+            startCinematicReveal() {
+                sfx.init();
+                const revealScreen = document.getElementById('revealScreen');
+                revealScreen.classList.add('active');
+
+                // Fade each word in sequentially
+                const words = [0, 1, 2, 3, 4];
+                words.forEach((idx, i) => {
+                    setTimeout(() => {
+                        const row = document.getElementById(`rw${idx}`);
+                        if (row) {
+                            row.classList.add('revealed');
+                            sfx.playChime(320 + i * 75, 'triangle', 0.6);
+                        }
+                    }, 700 + i * 900);
+                });
+
+                // Highlight initial letters
+                const highlightDelay = 700 + words.length * 900 + 600;
+                setTimeout(() => {
+                    words.forEach((idx) => {
+                        const row = document.getElementById(`rw${idx}`);
+                        if (row) row.classList.add('highlighted');
+                    });
+                    sfx.playChime(540, 'sine', 0.8);
+                }, highlightDelay);
+
+                // Morph and show grand KUTTU banner
+                const bannerDelay = highlightDelay + 1400;
+                setTimeout(() => {
+                    document.getElementById('wordsCascade').style.display = 'none';
+                    const banner = document.getElementById('kuttuBanner');
+                    banner.classList.add('shown');
+                    sfx.playChime(784, 'sine', 1.4);
+                }, bannerDelay);
+
+                // Show Acronym Breakdown Card
+                const breakdownDelay = bannerDelay + 1000;
+                setTimeout(() => {
+                    const breakdown = document.getElementById('acronymBreakdown');
+                    breakdown.classList.add('shown');
+                }, breakdownDelay);
+
+                // Enable Proceed to Final Dedication Button
+                setTimeout(() => {
+                    const btn = document.getElementById('btnToFinalMessage');
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                }, breakdownDelay + 1200);
+            }
+
+            showFinalDedication() {
+                const finalScreen = document.getElementById('finalScreen');
+                finalScreen.classList.add('active');
+            }
+
+            restart() {
+                // Reset all views and states
+                document.getElementById('finalScreen').classList.remove('active');
+                document.getElementById('revealScreen').classList.remove('active');
+                document.getElementById('bridgeOverlay').classList.remove('active');
+                document.getElementById('wordsCascade').style.display = 'flex';
+                document.getElementById('kuttuBanner').classList.remove('shown');
+                document.getElementById('acronymBreakdown').classList.remove('shown');
+
+                for (let i = 0; i < 5; i++) {
+                    const row = document.getElementById(`rw${i}`);
+                    if (row) {
+                        row.classList.remove('revealed', 'highlighted');
+                    }
+                }
+
+                // Reset dialogue bubbles
+                document.querySelectorAll('.dialogue-bubble, .chat-item, .notif-card').forEach(el => {
+                    el.classList.remove('show', 'visible');
+                });
+
+                const verdict = document.getElementById('cVerdict');
+                if (verdict) verdict.classList.remove('visible');
+
+                const tLine1 = document.getElementById('tLine1');
+                const tLine2 = document.getElementById('tLine2');
+                if (tLine1) tLine1.style.opacity = '0';
+                if (tLine2) tLine2.style.opacity = '0';
+
+                const crowd = document.getElementById('crowdLayer');
+                if (crowd) crowd.style.opacity = '1';
+
+                this.discoveredSecrets.clear();
+                const badge = document.getElementById('discoveryBadge');
+                badge.classList.remove('discovered');
+                document.getElementById('badgeText').textContent = `Secrets found: 0 / 5`;
+
+                this.goToScene('Landing');
+            }
+        }
+
+        // Initialize Starfield Canvas & Story on load
+        window.addEventListener('DOMContentLoaded', () => {
+            new Starfield('starCanvas');
+            window.app = new StoryApp();
+        });
+    </script>
+</body>
+</html>
