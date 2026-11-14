@@ -1,0 +1,2215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#25103a">
+<title>Walk With Me, Kuttu — A Journey by Muttu</title>
+<style>
+:root {
+  --night: #170926;
+  --deep-plum: #28123e;
+  --mid-plum: #421c66;
+  --royal-purple: #6c329b;
+  --vivid-violet: #8e44ad;
+  --soft-lavender: #b98be6;
+  --blush-rose: #f4c2db;
+  --candle-gold: #ffdf9e;
+  --warm-glow: rgba(255, 223, 158, 0.45);
+  --paper-bg: #fffbf9;
+  --card-shadow: 0 20px 45px rgba(18, 5, 33, 0.55);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: radial-gradient(circle at 50% 0%, #4a2175 0%, #26113b 40%, #140722 100%);
+  color: #f7edfd;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Background Floating Canvas & Glow */
+#ambienceCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.85;
+}
+
+/* Top Progress & Auto-Walk Controls Bar */
+.walk-hud {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(34, 14, 54, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(216, 178, 250, 0.35);
+  padding: 7px 14px;
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  max-width: 94vw;
+}
+
+.hud-btn {
+  background: rgba(142, 68, 173, 0.32);
+  border: 1px solid rgba(244, 194, 219, 0.35);
+  color: #f7e6ff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 13px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+.hud-btn:hover {
+  background: rgba(185, 139, 230, 0.45);
+  border-color: #ffd6ec;
+  transform: translateY(-1px);
+}
+.hud-btn.active {
+  background: linear-gradient(135deg, #f7d5eb, #d8b4f8);
+  color: #2f1147;
+  border-color: #fff;
+}
+
+.step-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+}
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(216, 178, 250, 0.3);
+  transition: all 0.35s ease;
+  cursor: pointer;
+}
+.step-dot.lit {
+  background: #ffdf9e;
+  box-shadow: 0 0 10px #ffdf9e;
+  transform: scale(1.25);
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 96px 20px 38px;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.kicker-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(142, 68, 173, 0.25);
+  border: 1px solid rgba(244, 194, 219, 0.4);
+  color: #fad2e6;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border-radius: 999px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 20px rgba(185, 139, 230, 0.2);
+}
+
+h1 {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: clamp(2.4rem, 7vw, 4.4rem);
+  font-weight: 400;
+  line-height: 1.15;
+  color: #ffffff;
+  margin-bottom: 18px;
+  text-shadow: 0 4px 30px rgba(185, 139, 230, 0.4);
+}
+
+h1 em {
+  font-style: italic;
+  background: linear-gradient(120deg, #ffd3eb, #cba5f5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  position: relative;
+}
+
+.subtitle {
+  font-size: clamp(0.95rem, 2.8vw, 1.18rem);
+  line-height: 1.8;
+  color: #e5d2f6;
+  max-width: 620px;
+  margin: 0 auto 28px;
+  font-weight: 300;
+}
+
+.byline-ribbon {
+  display: inline-block;
+  font-family: "Georgia", serif;
+  font-style: italic;
+  font-size: 1.22rem;
+  color: #f7d2e7;
+  padding: 6px 20px;
+  border-bottom: 1px solid rgba(247, 210, 231, 0.4);
+  margin-bottom: 34px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #f7d5eb 0%, #d8b4f8 100%);
+  color: #31144c;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 14px 30px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(185, 139, 230, 0.35);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.primary-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(247, 213, 235, 0.5);
+}
+
+.secondary-btn {
+  background: rgba(66, 28, 102, 0.55);
+  border: 1px solid rgba(185, 139, 230, 0.45);
+  color: #ebd7fd;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 14px 26px;
+  border-radius: 999px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.25s ease;
+}
+.secondary-btn:hover {
+  background: rgba(112, 44, 154, 0.55);
+  border-color: #ffd2ea;
+  color: #ffffff;
+}
+
+/* Warm Prelude Letter */
+.prelude-card {
+  position: relative;
+  z-index: 2;
+  width: min(780px, 92%);
+  margin: 15px auto 60px;
+  padding: 28px 32px;
+  border-radius: 26px;
+  background: linear-gradient(145deg, rgba(66, 28, 102, 0.55), rgba(38, 17, 59, 0.75));
+  border: 1px solid rgba(203, 165, 245, 0.25);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 20px 50px rgba(13, 3, 22, 0.4);
+  text-align: center;
+  line-height: 1.8;
+  color: #ecdbf7;
+  font-size: 1rem;
+}
+.prelude-card strong { color: #ffd8ec; }
+.prelude-quote {
+  font-family: "Georgia", serif;
+  font-style: italic;
+  font-size: 1.08rem;
+  color: #ffdf9e;
+  margin-top: 12px;
+  display: block;
+}
+
+/* The Walking Trail */
+.trail-container {
+  position: relative;
+  z-index: 2;
+  width: min(960px, 94%);
+  margin: 0 auto 90px;
+  padding: 30px 0 60px;
+}
+
+/* SVG Dotted Winding Road */
+.trail-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+.trail-path-glow {
+  stroke: rgba(185, 139, 230, 0.22);
+  stroke-width: 10;
+  fill: none;
+  stroke-linecap: round;
+}
+.trail-path {
+  stroke: rgba(255, 217, 240, 0.65);
+  stroke-width: 3;
+  stroke-dasharray: 8 10;
+  fill: none;
+  stroke-linecap: round;
+  animation: trailFlow 22s linear infinite;
+}
+@keyframes trailFlow {
+  to { stroke-dashoffset: -360; }
+}
+
+/* Animated Walking Couple Avatar along the Path */
+.interactive-walker {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -65%);
+  z-index: 6;
+  transition: top 1.15s cubic-bezier(0.34, 1.35, 0.64, 1), left 1.15s cubic-bezier(0.34, 1.35, 0.64, 1);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.walker-bubble {
+  background: linear-gradient(135deg, #ffddf0, #e7c8ff);
+  color: #37144d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 5px 13px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.38);
+  animation: floatMini 2s ease-in-out infinite alternate;
+}
+.walker-figure {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffe6f4 15%, #b983eb 68%, #5b268a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 28px rgba(255, 209, 237, 0.85), 0 0 55px rgba(142, 68, 173, 0.6);
+  border: 3px solid #ffffff;
+  position: relative;
+}
+.walker-figure.walking {
+  animation: walkStride 0.45s ease-in-out infinite alternate;
+}
+.walker-figure:not(.walking) {
+  animation: gentleBob 1.4s ease-in-out infinite alternate;
+}
+
+/* Couple Silhouette SVG Stride Animation */
+.couple-svg {
+  width: 44px;
+  height: 44px;
+  overflow: visible;
+}
+.leg-l { transform-origin: 16px 28px; animation: legSwingA 0.7s ease-in-out infinite alternate; }
+.leg-r { transform-origin: 16px 28px; animation: legSwingB 0.7s ease-in-out infinite alternate; }
+.leg-l2 { transform-origin: 29px 29px; animation: legSwingB 0.7s ease-in-out infinite alternate; }
+.leg-r2 { transform-origin: 29px 29px; animation: legSwingA 0.7s ease-in-out infinite alternate; }
+.mini-float-heart { animation: miniHeartRise 1.8s ease-in-out infinite; }
+
+@keyframes legSwingA { from { transform: rotate(-16deg); } to { transform: rotate(16deg); } }
+@keyframes legSwingB { from { transform: rotate(16deg); } to { transform: rotate(-16deg); } }
+@keyframes walkStride {
+  0% { transform: translateY(0px) rotate(-3deg) scale(1.04); }
+  100% { transform: translateY(-9px) rotate(3deg) scale(1.08); }
+}
+@keyframes miniHeartRise {
+  0% { transform: translateY(0) scale(0.85); opacity: 0.6; }
+  50% { transform: translateY(-5px) scale(1.15); opacity: 1; }
+  100% { transform: translateY(-9px) scale(0.9); opacity: 0.4; }
+}
+@keyframes gentleBob {
+  0% { transform: translateY(0px) scale(1); }
+  100% { transform: translateY(-6px) scale(1.04); }
+}
+@keyframes floatMini {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
+}
+@keyframes pulseBeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+/* Checkpoint Stop Elements */
+.checkpoint-stop {
+  position: relative;
+  z-index: 2;
+  width: 50%;
+  padding: 24px 46px 46px 0;
+  margin-bottom: 28px;
+  opacity: 0.78;
+  transform: translateY(14px);
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s ease;
+}
+.checkpoint-stop.in-view,
+.checkpoint-stop.visited {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.checkpoint-stop:nth-of-type(even) {
+  margin-left: 50%;
+  padding: 24px 0 46px 46px;
+}
+
+/* Street Lantern Node along the path */
+.lantern-node {
+  position: absolute;
+  top: 44px;
+  right: -18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #240c38;
+  border: 3px solid #cb9bf5;
+  box-shadow: 0 0 0 5px rgba(203, 155, 245, 0.25), 0 0 22px rgba(255, 223, 158, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  z-index: 3;
+  cursor: pointer;
+  transition: all 0.35s ease;
+}
+.checkpoint-stop:nth-of-type(even) .lantern-node {
+  right: auto;
+  left: -18px;
+}
+.lantern-node .candle-sparkle {
+  color: #ffdf9e;
+  animation: pulseBeat 1.5s infinite;
+}
+.checkpoint-stop.visited .lantern-node {
+  background: #ffdf9e;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 7px rgba(255, 223, 158, 0.42), 0 0 32px rgba(255, 223, 158, 0.95);
+  transform: scale(1.1);
+}
+
+/* Story Cards with Live Mini Scenario Banner */
+.memory-card {
+  position: relative;
+  background: linear-gradient(155deg, rgba(58, 25, 91, 0.88) 0%, rgba(30, 11, 50, 0.94) 100%);
+  border: 1px solid rgba(216, 178, 250, 0.3);
+  border-radius: 24px;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+}
+
+.memory-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(247, 213, 235, 0.65);
+  box-shadow: 0 25px 60px rgba(20, 5, 36, 0.75), 0 0 28px rgba(185, 139, 230, 0.3);
+}
+
+/* Live Mini Animated Scenario Strip on each Card */
+.card-scene-strip {
+  height: 86px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(216, 178, 250, 0.2);
+}
+
+.card-body-pad {
+  padding: 22px 26px 26px;
+}
+
+.checkpoint-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #dcb3fd;
+  margin-bottom: 8px;
+}
+
+.checkpoint-badge .status-pill {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffb8d9;
+  display: inline-block;
+  box-shadow: 0 0 8px #ffb8d9;
+}
+
+.memory-card h2 {
+  font-family: "Georgia", serif;
+  font-size: 1.45rem;
+  font-weight: 400;
+  color: #ffffff;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.card-desc {
+  font-size: 0.91rem;
+  line-height: 1.62;
+  color: #d1bfe3;
+  margin-bottom: 18px;
+}
+
+.read-btn {
+  background: linear-gradient(110deg, #6a2e9b 0%, #a453cd 100%);
+  color: #ffffff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 18px rgba(106, 46, 155, 0.4);
+}
+.read-btn:hover {
+  background: linear-gradient(110deg, #7c35b5 0%, #b862e3 100%);
+  box-shadow: 0 8px 25px rgba(185, 139, 230, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Secret Checkpoint - Golden & Special */
+.secret-stop .memory-card {
+  background: linear-gradient(155deg, rgba(78, 27, 85, 0.92) 0%, rgba(42, 13, 56, 0.96) 100%);
+  border: 1px solid rgba(255, 219, 158, 0.45);
+  box-shadow: 0 25px 50px rgba(25, 4, 30, 0.65), 0 0 28px rgba(255, 219, 158, 0.18);
+}
+.secret-stop .checkpoint-badge { color: #ffdf9e; }
+.secret-stop .read-btn {
+  background: linear-gradient(110deg, #b0467f 0%, #e8869c 100%);
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(232, 134, 156, 0.4);
+}
+
+/* =========================================================
+   THE 6 BESPOKE ANIMATED SCENARIOS (Card & Modal Dioramas)
+   ========================================================= */
+
+/* Shared Diorama Canvas & Overlay Rules */
+.diorama-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+.scene-caption-pill {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  background: rgba(20, 7, 34, 0.65);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f9e6ff;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  z-index: 5;
+}
+
+/* SCENARIO 1: SAD -> Gentle Midnight Rain + Warm Cozy Window Lamp */
+.scene-sad {
+  background: linear-gradient(180deg, #1b0d2e 0%, #361b54 65%, #4e2773 100%);
+}
+.scene-sad .cozy-window {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  transform: translateX(-50%);
+  width: 96px;
+  height: 68%;
+  background: radial-gradient(circle at 50% 60%, #ffe6b3 0%, #f5b971 55%, #8a4b7d 100%);
+  border-radius: 48px 48px 6px 6px;
+  border: 3px solid #2b1342;
+  box-shadow: 0 0 35px rgba(255, 218, 153, 0.55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+.scene-sad .cozy-window::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 48%, #2b1342 48%, #2b1342 52%, transparent 52%),
+              linear-gradient(180deg, transparent 54%, #2b1342 54%, #2b1342 58%, transparent 58%);
+  z-index: 3;
+}
+.scene-sad .hug-silhouettes {
+  font-size: 1.7rem;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 2px 4px rgba(43,19,66,0.5));
+  animation: gentleSway 3s ease-in-out infinite alternate;
+}
+.raindrop {
+  position: absolute;
+  top: -20px;
+  width: 1.5px;
+  height: 16px;
+  background: linear-gradient(180deg, transparent, rgba(216, 180, 248, 0.75));
+  animation: rainFall linear infinite;
+}
+@keyframes rainFall {
+  to { transform: translateY(240px) translateX(-12px); }
+}
+@keyframes gentleSway {
+  from { transform: rotate(-3deg) scale(0.98); }
+  to { transform: rotate(3deg) scale(1.03); }
+}
+
+/* SCENARIO 2: MISS -> Evening Railway Lights & Gliding Train */
+.scene-miss {
+  background: linear-gradient(180deg, #1d0c33 0%, #431d6b 60%, #241038 100%);
+}
+.scene-miss .moon-orb {
+  position: absolute;
+  top: 14%;
+  right: 16%;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff8e7, #f5c6e0);
+  box-shadow: 0 0 24px rgba(255, 224, 242, 0.7);
+}
+.scene-miss .station-track {
+  position: absolute;
+  bottom: 16%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(235, 198, 255, 0.45);
+}
+.scene-miss .gliding-train {
+  position: absolute;
+  bottom: 19%;
+  left: -180px;
+  display: flex;
+  gap: 6px;
+  animation: trainGlide 8.5s linear infinite;
+}
+.train-car {
+  width: 54px;
+  height: 22px;
+  background: #351654;
+  border: 1.5px solid #e2b8ff;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 0 4px;
+  box-shadow: 0 0 12px rgba(255, 223, 158, 0.35);
+}
+.train-win {
+  width: 8px;
+  height: 8px;
+  background: #ffdf9e;
+  border-radius: 2px;
+}
+.scene-miss .waiting-hearts {
+  position: absolute;
+  bottom: 20%;
+  left: 24%;
+  font-size: 1.25rem;
+  animation: pulseBeat 1.6s infinite;
+}
+@keyframes trainGlide {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(960px); }
+}
+
+/* SCENARIO 3: ANGRY -> Stormy Violet Clouds Parting to Golden Peace Lanterns */
+.scene-angry {
+  background: linear-gradient(180deg, #271042 0%, #52237a 55%, #7c3896 100%);
+}
+.peace-lantern {
+  position: absolute;
+  bottom: -24px;
+  font-size: 1.35rem;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 140, 0.85));
+  animation: lanternRise ease-in infinite;
+}
+.scene-angry .calm-ripple {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60px;
+  height: 60px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 216, 236, 0.45);
+  animation: rippleExpand 3.4s ease-out infinite;
+}
+.scene-angry .calm-ripple:nth-child(2) { animation-delay: 1.7s; }
+@keyframes lanternRise {
+  0% { transform: translateY(0) translateX(0) scale(0.8); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-230px) translateX(18px) scale(1.1); opacity: 0; }
+}
+@keyframes rippleExpand {
+  0% { width: 20px; height: 20px; opacity: 0.85; }
+  100% { width: 240px; height: 240px; opacity: 0; }
+}
+
+/* SCENARIO 4: SMILE -> Sunshine Lavender Field & Dancing Butterflies */
+.scene-smile {
+  background: linear-gradient(135deg, #4b1d78 0%, #863ca8 50%, #c9689f 100%);
+}
+.scene-smile .sunburst-glow {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 232, 179, 0.75) 0%, transparent 70%);
+  animation: pulseBeat 3s ease-in-out infinite;
+}
+.butterfly-item {
+  position: absolute;
+  font-size: 1.25rem;
+  animation: butterflyFlutter 4.5s ease-in-out infinite alternate;
+}
+@keyframes butterflyFlutter {
+  0% { transform: translate(0, 0) rotate(-10deg) scale(0.95); }
+  50% { transform: translate(22px, -18px) rotate(12deg) scale(1.1); }
+  100% { transform: translate(-14px, -28px) rotate(-6deg) scale(1); }
+}
+
+/* SCENARIO 5: MEMORY -> Park Walkway with Glowing Trees & Fireflies */
+.scene-memory {
+  background: linear-gradient(180deg, #1d0c36 0%, #3d1b63 65%, #231038 100%);
+}
+.scene-memory .park-arch {
+  position: absolute;
+  bottom: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 170px;
+  height: 75%;
+  border-top: 3px dashed rgba(255, 223, 158, 0.7);
+  border-left: 2px solid rgba(216, 178, 250, 0.35);
+  border-right: 2px solid rgba(216, 178, 250, 0.35);
+  border-radius: 90px 90px 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+}
+.firefly-dot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffdf9e;
+  box-shadow: 0 0 10px #ffdf9e, 0 0 18px #ffd1eb;
+  animation: fireflyDance 4s ease-in-out infinite alternate;
+}
+@keyframes fireflyDance {
+  0% { transform: translate(0, 0) scale(0.7); opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { transform: translate(26px, -22px) scale(1.25); opacity: 0.4; }
+}
+
+/* SCENARIO 6: SECRET -> Cosmic Stardust Constellation & Beating Crown Heart */
+.scene-secret {
+  background: radial-gradient(circle at 50% 50%, #63237d 0%, #2d0d47 60%, #150524 100%);
+}
+.scene-secret .orbit-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 110px;
+  height: 110px;
+  margin-left: -55px;
+  margin-top: -55px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 223, 158, 0.55);
+  animation: spinSlow 14s linear infinite;
+}
+.scene-secret .center-gem {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.1rem;
+  filter: drop-shadow(0 0 18px rgba(255, 200, 230, 0.9));
+  animation: pulseBeat 1.5s infinite;
+}
+@keyframes spinSlow {
+  to { transform: rotate(360deg); }
+}
+
+/* Emotional Memory Highlights (The Little Things We Cherish) */
+.memories-grid-section {
+  position: relative;
+  z-index: 2;
+  width: min(880px, 92%);
+  margin: 30px auto 70px;
+  text-align: center;
+}
+.grid-title {
+  font-family: "Georgia", serif;
+  font-size: 1.8rem;
+  color: #ffddf0;
+  margin-bottom: 12px;
+  font-weight: 400;
+}
+.grid-desc {
+  font-size: 0.94rem;
+  color: #caaee6;
+  margin-bottom: 28px;
+}
+.moments-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+.moment-chip {
+  background: rgba(53, 22, 82, 0.6);
+  border: 1px solid rgba(203, 165, 245, 0.25);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  color: #ecd7fb;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 0.25s ease;
+}
+.moment-chip:hover {
+  background: rgba(142, 68, 173, 0.45);
+  border-color: #ffd1eb;
+  transform: translateY(-2px) scale(1.03);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(185, 139, 230, 0.3);
+}
+
+/* Happy Tears Love Vault (Footer) */
+.farewell-section {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 60px 20px 80px;
+  border-top: 1px solid rgba(185, 139, 230, 0.2);
+  background: linear-gradient(180deg, transparent 0%, rgba(20, 6, 32, 0.8) 100%);
+}
+.farewell-heart {
+  font-size: 2.8rem;
+  display: inline-block;
+  color: #ff9ec9;
+  animation: pulseBeat 1.8s infinite;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 0 15px rgba(255, 158, 201, 0.6));
+}
+.farewell-text {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #e6d3f7;
+  max-width: 580px;
+  margin: 0 auto 20px;
+}
+.farewell-signature {
+  font-family: "Georgia", serif;
+  font-style: italic;
+  font-size: 1.6rem;
+  color: #ffd8ec;
+  letter-spacing: 0.04em;
+}
+.farewell-sub {
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #a881cb;
+  margin-top: 10px;
+}
+
+/* Letter Modal Experience with Dedicated Scenario Header */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 4, 21, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.letter-stationery {
+  width: min(740px, 100%);
+  max-height: 90vh;
+  background: var(--paper-bg);
+  border-radius: 28px;
+  position: relative;
+  box-shadow: 0 35px 100px rgba(0, 0, 0, 0.78), 0 0 50px rgba(185, 139, 230, 0.45);
+  transform: translateY(30px) scale(0.96);
+  transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.modal-overlay.active .letter-stationery {
+  transform: translateY(0) scale(1);
+}
+
+/* Live Scenario Stage inside Modal Top */
+.modal-scenario-stage {
+  width: 100%;
+  height: 168px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 2px solid #ead5f7;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(34, 12, 54, 0.75);
+  backdrop-filter: blur(6px);
+  color: #ffffff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+.modal-close-btn:hover {
+  background: #ffd3e9;
+  color: #27063f;
+  transform: rotate(90deg);
+}
+
+.letter-scroll-area {
+  overflow-y: auto;
+  padding: clamp(22px, 4.5vw, 38px);
+  position: relative;
+  z-index: 2;
+}
+.letter-scroll-area::-webkit-scrollbar { width: 6px; }
+.letter-scroll-area::-webkit-scrollbar-thumb { background: #cfb1eb; border-radius: 10px; }
+
+.letter-header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.letter-tag {
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #9254b8;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.letter-title {
+  font-family: "Georgia", serif;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  color: #3b1756;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.letter-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 14px 0 20px;
+}
+.letter-divider::before, .letter-divider::after {
+  content: "";
+  height: 1px;
+  width: 60px;
+  background: #dfc2f5;
+}
+.letter-divider span { color: #a766c8; font-size: 1rem; }
+
+.letter-content {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 1.04rem;
+  line-height: 1.88;
+  color: #3f2950;
+  white-space: pre-line;
+  margin-bottom: 26px;
+}
+
+.letter-footer-sign {
+  text-align: right;
+  border-top: 1px dashed #ebd6f6;
+  padding-top: 18px;
+  margin-top: 16px;
+}
+.letter-footer-sign .sign-name {
+  font-family: "Georgia", serif;
+  font-style: italic;
+  font-size: 1.28rem;
+  color: #7b389f;
+}
+.letter-footer-sign .sign-note {
+  font-size: 0.8rem;
+  color: #8c719e;
+  margin-top: 3px;
+}
+
+/* Interactive Modal Bottom Controls (Hug + Walk to Next) */
+.modal-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 22px;
+}
+
+.hug-btn {
+  background: linear-gradient(135deg, #f7d5eb 0%, #dab4f8 100%);
+  color: #3c145e;
+  border: none;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 12px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(185, 139, 230, 0.4);
+  transition: all 0.25s ease;
+}
+.hug-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 12px 30px rgba(247, 213, 235, 0.6);
+}
+
+.next-step-btn {
+  background: linear-gradient(110deg, #5e278a 0%, #9244ba 100%);
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 12px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(94, 39, 138, 0.35);
+  transition: all 0.25s ease;
+}
+.next-step-btn:hover {
+  transform: translateX(3px);
+  filter: brightness(1.1);
+}
+
+/* Little Toast Notification */
+.toast-msg {
+  position: fixed;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%) translateY(90px);
+  background: rgba(39, 14, 60, 0.95);
+  border: 1px solid rgba(244, 194, 219, 0.6);
+  color: #fce8f4;
+  padding: 12px 26px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.45);
+  z-index: 300;
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  text-align: center;
+  max-width: 90vw;
+}
+.toast-msg.show { transform: translateX(-50%) translateY(0); }
+
+/* Responsive adjustments */
+@media (max-width: 720px) {
+  .hero { padding: 84px 16px 25px; }
+  .trail-container { padding: 10px 0 40px; }
+  .trail-path-glow, .trail-path { display: none; }
+  .trail-container::before {
+    content: "";
+    position: absolute;
+    top: 20px;
+    bottom: 20px;
+    left: 26px;
+    width: 3px;
+    background: repeating-linear-gradient(to bottom, #d8b4f8 0 8px, transparent 8px 16px);
+    opacity: 0.7;
+    z-index: 1;
+  }
+  .interactive-walker { left: 26px !important; top: 10px; }
+  .interactive-walker .walker-bubble { font-size: 0.65rem; }
+  .walker-figure { width: 56px; height: 56px; }
+  .checkpoint-stop, .checkpoint-stop:nth-of-type(even) {
+    width: 100%;
+    margin-left: 0;
+    padding: 12px 0 28px 64px;
+  }
+  .lantern-node, .checkpoint-stop:nth-of-type(even) .lantern-node {
+    left: 11px;
+    right: auto;
+    top: 34px;
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+  .card-scene-strip { height: 74px; }
+  .card-body-pad { padding: 18px; }
+  .memory-card h2 { font-size: 1.26rem; }
+  .prelude-card { padding: 20px 22px; font-size: 0.92rem; }
+  .modal-scenario-stage { height: 138px; }
+  .letter-content { font-size: 0.98rem; line-height: 1.78; }
+}
+</style>
+</head>
+<body>
+
+<!-- Ambient Stars and Falling Lavender/Rose Petals -->
+<canvas id="ambienceCanvas"></canvas>
+
+<!-- Top Floating Walkthrough Control HUD -->
+<nav class="walk-hud" aria-label="Walkthrough controls">
+  <button class="hud-btn" id="autoWalkBtn" title="Let us walk step-by-step automatically">
+    <span>🚶‍♂️🚶‍♀️</span>
+    <span id="autoWalkLabel">Guided Walk</span>
+  </button>
+
+  <div class="step-dots" id="stepDots">
+    <span class="step-dot lit" data-jump="0" title="Checkpoint 1"></span>
+    <span class="step-dot" data-jump="1" title="Checkpoint 2"></span>
+    <span class="step-dot" data-jump="2" title="Checkpoint 3"></span>
+    <span class="step-dot" data-jump="3" title="Checkpoint 4"></span>
+    <span class="step-dot" data-jump="4" title="Checkpoint 5"></span>
+    <span class="step-dot" data-jump="5" title="Final Secret"></span>
+  </div>
+
+  <button class="hud-btn" id="audioToggleBtn" title="Play gentle memory melody">
+    <span>🎵</span>
+    <span id="audioStatusText">Melody</span>
+  </button>
+</nav>
+
+<!-- Header / Hero Section -->
+<header class="hero" id="top">
+  <div class="kicker-tag">
+    <span>✦</span> An Animated Walk Through Our Hearts <span>✦</span>
+  </div>
+  <h1>Walk With Me, <em>Kuttu</em></h1>
+  <p class="subtitle">
+    Every step along this winding path unlocks a living scene from our story—rainy windows, railway lights, park walks, and words written for your heart.
+  </p>
+  <div class="byline-ribbon">
+    Kuttu by Muttu ♡
+  </div>
+
+  <div class="hero-actions">
+    <button class="primary-btn" id="startWalkBtn">
+      <span>Start Walking Together</span>
+      <span>🐾</span>
+    </button>
+    <button class="secondary-btn" id="heroAutoWalkBtn">
+      <span>Auto-Stroll Through Memories ✨</span>
+    </button>
+  </div>
+</header>
+
+<!-- Prelude Emotional Card -->
+<section class="prelude-card">
+  We started as schoolmates who walked past each other without saying much. Five years later, destiny took our quiet past and turned it into the warmest part of my life.
+  <br>
+  <strong>Follow our little silhouettes down the lanterns—each letter opens inside its own living memory world.</strong>
+  <span class="prelude-quote">“Namma unexpected moments dhaan en vaazhkaiyoda most beautiful memories.”</span>
+</section>
+
+<!-- The Main Trail / Walkthrough -->
+<main class="trail-container" id="trail">
+
+  <!-- SVG Connecting Path for larger screens -->
+  <svg class="trail-svg" id="trailSvg" aria-hidden="true">
+    <path id="svgGlowPath" class="trail-path-glow" d="" />
+    <path id="svgDottedPath" class="trail-path" d="" />
+  </svg>
+
+  <!-- Interactive Walking Couple Avatar -->
+  <div class="interactive-walker" id="walker">
+    <div class="walker-bubble" id="walkerBubble">Walking with Kuttu... 💜</div>
+    <div class="walker-figure" id="walkerIcon">
+      <!-- Animated Couple Holding Hands SVG -->
+      <svg class="couple-svg" viewBox="0 0 46 44" fill="none">
+        <!-- Floating heart above couple -->
+        <path class="mini-float-heart" d="M23 9.5C21.8 7.8 19.3 8.1 19.3 10.2C19.3 12.1 23 14.5 23 14.5C23 14.5 26.7 12.1 26.7 10.2C26.7 8.1 24.2 7.8 23 9.5Z" fill="#a81c63"/>
+        <!-- Person 1 (Muttu) -->
+        <circle cx="16" cy="16" r="3.4" fill="#2b0d44"/>
+        <path d="M13 20.5C13 19.6 13.8 19 14.8 19H17.2C18.2 19 19 19.6 19 20.5V28H13V20.5Z" fill="#2b0d44"/>
+        <line class="leg-l" x1="14.7" y1="28" x2="13.5" y2="37" stroke="#2b0d44" stroke-width="2.4" stroke-linecap="round"/>
+        <line class="leg-r" x1="17.3" y1="28" x2="18.8" y2="37" stroke="#2b0d44" stroke-width="2.4" stroke-linecap="round"/>
+        <!-- Holding Hands Bridge -->
+        <path d="M18.5 23.5Q22.5 25.5 26.5 23.5" stroke="#2b0d44" stroke-width="2.1" stroke-linecap="round"/>
+        <!-- Person 2 (Kuttu) -->
+        <circle cx="29" cy="17" r="3.2" fill="#2b0d44"/>
+        <path d="M26.5 21.2C26.5 20.4 27.2 19.8 28 19.8H30C30.8 19.8 31.5 20.4 31.5 21.2L33 29H25L26.5 21.2Z" fill="#2b0d44"/>
+        <line class="leg-l2" x1="27.5" y1="29" x2="26.2" y2="37" stroke="#2b0d44" stroke-width="2.3" stroke-linecap="round"/>
+        <line class="leg-r2" x1="30.5" y1="29" x2="31.8" y2="37" stroke="#2b0d44" stroke-width="2.3" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Checkpoint 01: Sad -> Rainy Night & Warm Window -->
+  <article class="checkpoint-stop" data-step="0" data-id="sad">
+    <div class="lantern-node" title="Step 1"><span class="candle-sparkle">🕯️</span></div>
+    <div class="memory-card">
+      <div class="card-scene-strip" id="strip-sad"></div>
+      <div class="card-body-pad">
+        <div class="checkpoint-badge"><span class="status-pill"></span> Checkpoint 01 · A Safe Haven</div>
+        <h2>When you're sad</h2>
+        <p class="card-desc">A warm lit window against midnight rain—for the heavy days when you just need a silent, tight hug.</p>
+        <button class="read-btn" data-letter="sad">
+          <span>Step Inside & Read</span>
+          <span>💌</span>
+        </button>
+      </div>
+    </div>
+  </article>
+
+  <!-- Checkpoint 02: Miss -> Railway Station Lights & Gliding Train -->
+  <article class="checkpoint-stop" data-step="1" data-id="miss">
+    <div class="lantern-node" title="Step 2"><span class="candle-sparkle">🕯️</span></div>
+    <div class="memory-card">
+      <div class="card-scene-strip" id="strip-miss"></div>
+      <div class="card-body-pad">
+        <div class="checkpoint-badge"><span class="status-pill"></span> Checkpoint 02 · Longing & Smiles</div>
+        <h2>When you miss me</h2>
+        <p class="card-desc">Gliding station lights under a moonlit sky—revisiting our railway talks, food sharing, and scooty rides.</p>
+        <button class="read-btn" data-letter="miss">
+          <span>Step Inside & Read</span>
+          <span>💌</span>
+        </button>
+      </div>
+    </div>
+  </article>
+
+  <!-- Checkpoint 03: Angry -> Floating Peace Lanterns -->
+  <article class="checkpoint-stop" data-step="2" data-id="angry">
+    <div class="lantern-node" title="Step 3"><span class="candle-sparkle">🕯️</span></div>
+    <div class="memory-card">
+      <div class="card-scene-strip" id="strip-angry"></div>
+      <div class="card-body-pad">
+        <div class="checkpoint-badge"><span class="status-pill"></span> Checkpoint 03 · Patient Listening</div>
+        <h2>When you're angry with me</h2>
+        <p class="card-desc">Soft glowing sky lanterns rising into calm waters—because your feelings deserve patience and gentle understanding.</p>
+        <button class="read-btn" data-letter="angry">
+          <span>Step Inside & Read</span>
+          <span>💌</span>
+        </button>
+      </div>
+    </div>
+  </article>
+
+  <!-- Checkpoint 04: Smile -> Golden Sunburst & Butterflies -->
+  <article class="checkpoint-stop" data-step="3" data-id="smile">
+    <div class="lantern-node" title="Step 4"><span class="candle-sparkle">🕯️</span></div>
+    <div class="memory-card">
+      <div class="card-scene-strip" id="strip-smile"></div>
+      <div class="card-body-pad">
+        <div class="checkpoint-badge"><span class="status-pill"></span> Checkpoint 04 · Your Purest Laugh</div>
+        <h2>When you need a smile</h2>
+        <p class="card-desc">Warm lavender sunshine and dancing butterflies—a little reminder of how effortlessly you brighten my whole world.</p>
+        <button class="read-btn" data-letter="smile">
+          <span>Step Inside & Read</span>
+          <span>💌</span>
+        </button>
+      </div>
+    </div>
+  </article>
+
+  <!-- Checkpoint 05: Memory -> Firefly Park Archway -->
+  <article class="checkpoint-stop" data-step="4" data-id="memory">
+    <div class="lantern-node" title="Step 5"><span class="candle-sparkle">🕯️</span></div>
+    <div class="memory-card">
+      <div class="card-scene-strip" id="strip-memory"></div>
+      <div class="card-body-pad">
+        <div class="checkpoint-badge"><span class="status-pill"></span> Checkpoint 05 · Our Little Universe</div>
+        <h2>When you want to remember a happy moment</h2>
+        <p class="card-desc">Fireflies dancing beneath a quiet park archway—from school strangers to five years later holding hands.</p>
+        <button class="read-btn" data-letter="memory">
+          <span>Step Inside & Read</span>
+          <span>💌</span>
+        </button>
+      </div>
+    </div>
+  </article>
+
+  <!-- Checkpoint 06: Secret -> Cosmic Stardust Halo -->
+  <article class="checkpoint-stop secret-stop" data-step="5" data-id="secret">
+    <div class="lantern-node" title="Special Lantern"><span class="candle-sparkle">✨</span></div>
+    <div class="memory-card">
+      <div class="card-scene-strip" id="strip-secret"></div>
+      <div class="card-body-pad">
+        <div class="checkpoint-badge"><span class="status-pill" style="background:#ffdf9e;box-shadow:0 0 8px #ffdf9e;"></span> Final Lantern · Kept in My Heart</div>
+        <h2>When you forget how much you mean to me</h2>
+        <p class="card-desc">A glowing constellation orbiting one beating heart—for the moments you ever doubt how precious you are.</p>
+        <button class="read-btn" data-letter="secret">
+          <span>Open the Secret Letter</span>
+          <span>💝</span>
+        </button>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<!-- Interactive Memory Chips Section -->
+<section class="memories-grid-section">
+  <h3 class="grid-title">Our Little Milestones</h3>
+  <p class="grid-desc">Tap on any memory we built together to remember how sweet it felt:</p>
+  
+  <div class="moments-chips">
+    <div class="moment-chip" data-whisper="Remember how fast both our hearts beat? The crowd didn't exist for us.">
+      <span>🚉</span> Railway station meet
+    </div>
+    <div class="moment-chip" data-whisper="Sharing food and watching you laugh with eyes sparkling like lanterns.">
+      <span>🍽️</span> Food sharing in restaurant
+    </div>
+    <div class="moment-chip" data-whisper="Holding your shoulders, wind on our faces, just grateful you were riding with me.">
+      <span>🛵</span> Scooty drop
+    </div>
+    <div class="moment-chip" data-whisper="Our fingers interlocking quietly, wishing the path would never end.">
+      <span>🌿</span> Park walk with hands held
+    </div>
+    <div class="moment-chip" data-whisper="Your tender smile looking at my sister's baby is etched forever in my soul.">
+      <span>👶</span> Visiting home & sister's baby
+    </div>
+    <div class="moment-chip" data-whisper="Seeing you beside your mom at church felt so peaceful and pure.">
+      <span>⛪</span> Church & meeting your Amma
+    </div>
+    <div class="moment-chip" data-whisper="An entire day spent in traditional clothes, sneaking looks and quiet smiles.">
+      <span>🎉</span> Your sister's marriage day
+    </div>
+    <div class="moment-chip" data-whisper="Five long years went away in a single blink the second our eyes met again.">
+      <span>✨</span> The 5-year gap reunited
+    </div>
+  </div>
+</section>
+
+<!-- Emotional Farewell -->
+<footer class="farewell-section">
+  <div class="farewell-heart">💜</div>
+  <p class="farewell-text">
+    Whenever you're tired, whenever tears touch your cheeks, come walk down this path again. These words won't change, and neither will the space you have in my heart.
+  </p>
+  <div class="farewell-signature">Forever your Muttu</div>
+  <div class="farewell-sub">Kuttu by Muttu · Always by your side</div>
+</footer>
+
+<!-- Interactive Letter Popup Modal with Bespoke Animated Scenario Stage -->
+<div class="modal-overlay" id="letterModal" role="dialog" aria-modal="true" aria-labelledby="modalLetterTitle">
+  <div class="letter-stationery">
+    <button class="modal-close-btn" id="closeModalBtn" aria-label="Close letter">✕</button>
+
+    <!-- Live Theatrical Scenario Banner tailored to the active letter -->
+    <div class="modal-scenario-stage" id="modalScenarioStage"></div>
+    
+    <div class="letter-scroll-area" id="letterScrollArea">
+      <div class="letter-header">
+        <span class="letter-tag" id="modalTag">Checkpoint Letter</span>
+        <h2 class="letter-title" id="modalLetterTitle">Letter Title</h2>
+        <div class="letter-divider">
+          <span>💜</span>
+        </div>
+      </div>
+
+      <div class="letter-content" id="modalLetterBody"></div>
+
+      <div class="letter-footer-sign">
+        <div class="sign-name">With all my heart, Muttu ♡</div>
+        <div class="sign-note">Always here for you, Kuttu.</div>
+      </div>
+
+      <div class="modal-actions-row">
+        <button class="hug-btn" id="sendHugBtn">
+          Receive a Virtual Warm Hug 🤗
+        </button>
+        <button class="next-step-btn" id="nextCheckpointBtn">
+          Walk to Next Memory →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Toast Notification -->
+<div class="toast-msg" id="toastMsg">Sent with warmth!</div>
+
+<script>
+/* 
+  Pure Vanilla JavaScript:
+  - 6 Distinct Animated Scenarios (Rainy Cozy Window, Railway Train Lights, Peace Lanterns, Sunshine Butterflies, Firefly Park, Cosmic Stardust)
+  - Interactive Walking Couple Avatar with stride animation & Guided Auto-Walk mode
+  - Scroll-linked walkthrough detection + smooth curved SVG trail
+  - Web Audio API tailored soundscapes per scenario (zero external audio URLs)
+*/
+
+const lettersData = {
+  sad: {
+    step: 0,
+    tag: "Checkpoint 01 · A warm hug",
+    title: "Open when you're sad",
+    caption: "Warm window light · Safe from the rain",
+    notes: [329.63, 392.00, 493.88, 587.33], // gentle comforting E minor9 arpeggio
+    body: `Hey di, ❤️
+
+Enna aachu nu enakku theriyala. Aana nee ippo happy ah illa nu mattum enakku puriyuthu.
+
+First, please don't force yourself to be okay. Ellathayum strong ah handle pannanum nu avasiyam illa. Sometimes azhanum pola irukkum, sometimes yaar kittayum pesa thonathu. That's completely okay.
+
+Unakku ellathayum explain pannanum nu avasiyam illa. Un feelings ah justify pannanum nu avasiyam illa.
+
+Unakku enna aachu, ethana vishayam manasula irukku, ellame sollu. Naan judge panna maaten. Un problem ah udane solve panna mudiyalainalum, at least nee thaniya face panna vida maaten.
+
+Namma school la same place la irundhom, aana appo ivlo pesunathu illa. Yaarukku theriyum, five years ku apram thirumba paathukittu, ippadi orutharukku oruthar close aavom nu?
+
+Sometimes life unexpected ah sila beautiful people ah namakku thirumba introduce pannum.
+
+Nee happy ah irukkumbothu mattum illa, sad ah irukkumbothum un kooda irukkanum nu dhaan aasai.
+
+Nee perfect ah irukkanum nu naan unnai care pannala. Un bad days, un silence, un insecurities edhuvume unna less special aakkathu.
+
+Imagine naan ippo un pakkathula irundhu, edhuvum pesaama unna tight ah hug panren.
+
+Konjam rest edu. Unna nee konjam nalla paathuko.
+
+You don't have to be okay all the time. You deserve to be loved even on your difficult days.
+
+I'm here, di. ❤️`
+  },
+  miss: {
+    step: 1,
+    tag: "Checkpoint 02 · Missing you",
+    title: "Open when you miss me",
+    caption: "Moonlit railway platform · Counting miles to you",
+    notes: [293.66, 369.99, 440.00, 554.37], // nostalgic Dmaj7
+    body: `Hey loosu! ❤️
+
+Enna miss panriya? Hehe.
+
+Actually, ippo naanum un kooda irundha nalla irukkum nu thonuthu.
+
+Namma five years ku apram random ah paathukitta andha moment nyabagam irukka? Appo just sight mattum dhaan. Aana andha small moment namma life la ivlo memories create pannum nu nenachirukka maatom.
+
+Apram Instagram la text, WhatsApp la conversations, calls nu slowly namma close aagurathu start aachu.
+
+Un sister marriage ku vandhu full day spend pannathu, railway station la meet panni pesunathu, restaurant la onna saapittu food share pannathu...
+
+Un scooty la nee enna drop pannathu kooda nyabagam irukku.
+
+Park la kai pidichu nadantha andha moment...
+
+En veetukku vandhu en sister baby ah paathathu...
+
+Un church la un amma va meet pannathu...
+
+Idhellam nenachale oru smile varuthu.
+
+Sila memories romba simple ah irukkum. Aana namma manasukku romba close ah irukkum.
+
+I wish we could go back to those moments sometimes. But more than going back, I wish we could create many more such moments.
+
+Distance irukkurathunaala care kammi aagidathu. Daily pesunalum, konjam busy ah irundhalum, namma share pannina memories oda value maarathu.
+
+One day, indha letter padikkama naan un pakkathula irundhu pesittu iruppen.
+
+Until then, imagine my hug, a forehead kiss and one simple sentence:
+
+I'm really happy that life brought you back into my life.
+
+Miss you di. ❤️`
+  },
+  angry: {
+    step: 2,
+    tag: "Checkpoint 03 · Understanding",
+    title: "Open when you're angry with me",
+    caption: "Sky lanterns rising · Softening every storm",
+    notes: [261.63, 329.63, 392.00, 493.88], // calm Cmaj7
+    body: `Hey di,
+
+First of all, nee en mela kovama irundha, indha letter padikkumbothu konjam calm ah iru.
+
+Unakku en mela kovam vara reason irukkalam. Naan edhavadhu thappa pesirukkalam, purinjukaama nadanthirukkalam, illa unknowingly unna hurt pannirukkalam.
+
+Naan always correct ah iruppen nu solla maaten.
+
+Sometimes enakku eppadi pesanum, eppadi react pannanum nu theriyama poidum. Unna hurt panna koodathu nu ninaichalum, sila neram en words opposite ah poidum.
+
+But please, un feelings ah suppress pannikaatha.
+
+Unakku hurt aana sollu. Kovam irundha sollu. Enna pidikkala na athayum open ah sollu.
+
+Namma railway station la meet pannumbothu irundha comfort, restaurant la food share pannumbothu irundha happiness, park la kai pidichu nadanthappo irundha closeness...
+
+Indha moments ellame enakku precious.
+
+Namma rendu perum perfect illa. Mistakes pannuvom. Different ah think pannuvom. Sometimes misunderstand pannippom.
+
+Aana orutharoda feelings ah innoruthar purinjuka try pannalam.
+
+I don't want you to hide your feelings just to keep me happy. Unakku enna thonutho adha open ah sollu. Naanum enna improve pannanumo adha kathukiren.
+
+Oru aasai mattum irukku.
+
+Namma sanda poduratha vida, sanda vandhaalum adha thaandi understand pannikkira relationship ah irukkanum.
+
+I'm not asking you to never be angry with me. I'm asking you to never feel that you cannot talk to me.
+
+Kovam konjam koranja apram pesalam di. ❤️`
+  },
+  smile: {
+    step: 3,
+    tag: "Checkpoint 04 · A little sunshine",
+    title: "Open when you need a smile",
+    caption: "Lavender sunshine & butterflies · Smile pannunga madam!",
+    notes: [392.00, 493.88, 587.33, 739.99], // bright joyful Gmaj7
+    body: `Hellooooo madam! 😂❤️
+
+Indha letter open pannirukka na, either mood off ah irukku illa enna romba miss panra.
+
+First, smile pannunga madam! Idhu order. 😂
+
+Unakku theriyuma?
+
+Sometimes nee panra silly things, random questions, unexpected reactions ellame enakku smile vara vachirukku.
+
+Namma school days la same place la irundhom. Aana appo ivlo close ah pesuvom nu yaar nenachiruppa?
+
+Five years gap!
+
+Oru random sight, apram Instagram, WhatsApp, calls...
+
+Then un sister marriage la full day together!
+
+Railway station la meet, restaurant la food share, un scooty la drop, park la walking with hands held...
+
+And finally en veetukku vandhu en sister baby ah paathathu!
+
+Un church la un amma va meet pannathu kooda marakka mudiyatha moment.
+
+Paathiya, evlo random ah start aana story la evlo memories irukku!
+
+Sometimes nee un appearance, behaviour, mood ellathayum overthink pannalam.
+
+But I hope one day you see yourself with the same kindness that I see you with.
+
+Nee unakku theriyuratha vida romba special.
+
+So ippo phone ah konjam keela vai. Un favourite song podu. Unakku pudicha snack sapdu.
+
+Indha world la un sirippu paathu genuinely happy aagura oruthan irukkaan.
+
+Adhu naan.
+
+You have unknowingly become a part of some of my favourite memories.
+
+Keep smiling, loosu! ❤️`
+  },
+  memory: {
+    step: 4,
+    tag: "Checkpoint 05 · Our story",
+    title: "Open when you want to remember a happy moment",
+    caption: "Park archway & fireflies · Walking hand in hand",
+    notes: [349.23, 440.00, 523.25, 659.25], // warm tender Fmaj7
+    body: `Hey di,
+
+Indha letter dhaan namma memories pathi. ❤️
+
+Namma school la same place la irundhom. Aana appo namma rendu perum ivlo pesala.
+
+Five years ku apram unexpected ah thirumba paathukittom.
+
+Andha one sight la irundhu start aana connection, Instagram messages ah maaruchu, WhatsApp conversations ah maaruchu, calls ah maaruchu.
+
+Un sister marriage la full day spend pannathu...
+
+Railway station la meet panni pesunathu...
+
+Restaurant la onna saapittu food share pannathu...
+
+Un scooty la nee enna drop pannathu...
+
+Park la kai pidichu nadanthathu...
+
+En veetukku vandhu en sister baby ah paathathu...
+
+Un church la un amma va meet pannathu...
+
+Ippo idhellam yosikkumbothu, evlo beautiful ah namma memories build aagirukku nu thonuthu.
+
+Indha memories la edhuvum expensive illa. Periya plans illa. Special arrangements illa.
+
+But each moment has its own place in my heart.
+
+Sometimes oru simple conversation kooda oru naal full ah happy ah vechurum. Sometimes oru small moment kooda lifetime nyabagam irukkum.
+
+Namma life la ellame perfect ah irukkanum nu illa. Every day romantic ah irukkanum nu illa. Every conversation happy ah mudiyanum nu illa.
+
+But namma share pannina genuine moments ah mattum marandhuda koodathu.
+
+I don't just want beautiful memories with you. I want to create more beautiful memories with you.
+
+Namma siricha moments mattum illa, namma learn pannina moments kooda namma story oda part.
+
+Thank you for becoming such a beautiful part of my memories.
+
+And I hope namma story la innum neraya beautiful pages irukkum.
+
+With lots of love. ❤️`
+  },
+  secret: {
+    step: 5,
+    tag: "The final little secret · Read anytime",
+    title: "Open when you forget how much you mean to me",
+    caption: "Written in starlight · You are deeply loved",
+    notes: [293.66, 440.00, 554.37, 659.25, 880.00], // emotional soaring Dmaj9
+    body: `Hey di,
+
+Oruvela naan daily sollaama irukkalam. Sometimes express panna theriyama irukkalam.
+
+But I want you to know something.
+
+Nee en life la vandhathukku apram, sila ordinary moments kooda special ah maarirukku.
+
+Un kooda pesurathu, un kitta share panrathu, un happiness ah paakurathu, un feelings ah understand panna try panrathu — idhellam enakku meaningful.
+
+Namma school days la pesama irundha rendu per, five years ku apram thirumba meet aagi, ivlo memories create pannirukkom.
+
+Sometimes I wonder how one random meeting could become so many beautiful memories.
+
+Unakku past irukkalam. Fears irukkalam. Insecurities irukkalam. Sometimes unnaiye nee doubt pannalam.
+
+But un past un worth ah decide pannaathu.
+
+Un mistakes un identity illa.
+
+Un bad days un entire life illa.
+
+Nee love receive panna deserve panra oru person.
+
+Unakku ellathayum thaniya handle pannanum nu avasiyam illa.
+
+Naan unnai change panna varala. Unna purinjuka, un kooda grow aaga, un happiness la share panna dhaan aasai.
+
+I don't know what every tomorrow will look like. But I know that the moments we've shared mean a lot to me.
+
+Someone genuinely wanted you to feel loved, understood and valued, even on the days when you couldn't see your own worth.
+
+And that someone is me. ❤️
+
+Take care of yourself, di.
+
+Always keep that beautiful smile.`
+  }
+};
+
+/* Scenario HTML Generator (powers both the card preview strips AND the modal stage) */
+function buildScenarioHTML(key, isModal = false) {
+  const caption = isModal ? `<div class="scene-caption-pill">${lettersData[key].caption}</div>` : "";
+  switch (key) {
+    case "sad": {
+      let drops = "";
+      const dropCount = isModal ? 26 : 14;
+      for (let i = 0; i < dropCount; i++) {
+        const left = (i * (100 / dropCount)) + (Math.random() * 4);
+        const dur = (0.9 + Math.random() * 0.7).toFixed(2);
+        const delay = (Math.random() * 1.5).toFixed(2);
+        drops += `<span class="raindrop" style="left:${left}%;animation-duration:${dur}s;animation-delay:-${delay}s;"></span>`;
+      }
+      return `<div class="diorama-stage scene-sad">
+        ${drops}
+        <div class="cozy-window"><span class="hug-silhouettes">🫂</span></div>
+        ${caption}
+      </div>`;
+    }
+    case "miss": {
+      return `<div class="diorama-stage scene-miss">
+        <div class="moon-orb"></div>
+        <div class="waiting-hearts">💜✨</div>
+        <div class="gliding-train">
+          <div class="train-car"><span class="train-win"></span><span class="train-win"></span><span class="train-win"></span></div>
+          <div class="train-car"><span class="train-win"></span><span class="train-win"></span><span class="train-win"></span></div>
+          <div class="train-car"><span class="train-win"></span><span class="train-win"></span><span class="train-win"></span></div>
+        </div>
+        <div class="station-track"></div>
+        ${caption}
+      </div>`;
+    }
+    case "angry": {
+      let lanterns = "";
+      const count = isModal ? 9 : 5;
+      for (let i = 0; i < count; i++) {
+        const left = 12 + (i * (76 / count));
+        const dur = (3.8 + (i % 3) * 1.1).toFixed(1);
+        const delay = (i * 0.75).toFixed(2);
+        lanterns += `<span class="peace-lantern" style="left:${left}%;animation-duration:${dur}s;animation-delay:-${delay}s;">🏮</span>`;
+      }
+      return `<div class="diorama-stage scene-angry">
+        <div class="calm-ripple"></div>
+        <div class="calm-ripple"></div>
+        ${lanterns}
+        ${caption}
+      </div>`;
+    }
+    case "smile": {
+      const items = ["🦋", "🌸", "🦋", "✨", "🌺", "🦋"];
+      let floating = "";
+      const limit = isModal ? 6 : 4;
+      for (let i = 0; i < limit; i++) {
+        const left = 14 + i * 14;
+        const top = 22 + (i % 2) * 32;
+        const delay = (i * 0.6).toFixed(2);
+        floating += `<span class="butterfly-item" style="left:${left}%;top:${top}%;animation-delay:-${delay}s;">${items[i]}</span>`;
+      }
+      return `<div class="diorama-stage scene-smile">
+        <div class="sunburst-glow"></div>
+        ${floating}
+        ${caption}
+      </div>`;
+    }
+    case "memory": {
+      let fireflies = "";
+      const fCount = isModal ? 14 : 8;
+      for (let i = 0; i < fCount; i++) {
+        const left = 10 + (i * (80 / fCount));
+        const top = 18 + ((i * 19) % 62);
+        const delay = (i * 0.45).toFixed(2);
+        fireflies += `<span class="firefly-dot" style="left:${left}%;top:${top}%;animation-delay:-${delay}s;"></span>`;
+      }
+      return `<div class="diorama-stage scene-memory">
+        ${fireflies}
+        <div class="park-arch"><span style="font-size:1.35rem;">👫💜</span></div>
+        ${caption}
+      </div>`;
+    }
+    case "secret": {
+      return `<div class="diorama-stage scene-secret">
+        <div class="orbit-ring"></div>
+        <div class="center-gem">💝</div>
+        ${caption}
+      </div>`;
+    }
+    default:
+      return "";
+  }
+}
+
+/* Populate mini animated scenario strips on all 6 cards */
+Object.keys(lettersData).forEach((key) => {
+  const stripEl = document.getElementById(`strip-${key}`);
+  if (stripEl) stripEl.innerHTML = buildScenarioHTML(key, false);
+});
+
+/* DOM References */
+const modal = document.getElementById('letterModal');
+const modalScenarioStage = document.getElementById('modalScenarioStage');
+const modalTag = document.getElementById('modalTag');
+const modalTitle = document.getElementById('modalLetterTitle');
+const modalBody = document.getElementById('modalLetterBody');
+const letterScrollArea = document.getElementById('letterScrollArea');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const nextCheckpointBtn = document.getElementById('nextCheckpointBtn');
+const walker = document.getElementById('walker');
+const walkerIcon = document.getElementById('walkerIcon');
+const walkerBubble = document.getElementById('walkerBubble');
+const trailContainer = document.getElementById('trail');
+const stops = document.querySelectorAll('.checkpoint-stop');
+const stepDots = document.querySelectorAll('.step-dot');
+const toast = document.getElementById('toastMsg');
+const sendHugBtn = document.getElementById('sendHugBtn');
+const autoWalkBtn = document.getElementById('autoWalkBtn');
+const autoWalkLabel = document.getElementById('autoWalkLabel');
+
+const stepOrder = ['sad', 'miss', 'angry', 'smile', 'memory', 'secret'];
+let currentStep = 0;
+let walkStopTimeout = null;
+let autoWalkTimer = null;
+
+/* Show Little Toast Helper */
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2900);
+}
+
+/* Move the Walking Couple smoothly along the trail */
+function updateWalkerPosition(stepIndex) {
+  const targetStop = document.querySelector(`.checkpoint-stop[data-step="${stepIndex}"]`);
+  if (!targetStop) return;
+
+  currentStep = stepIndex;
+  targetStop.classList.add('visited');
+
+  // Update HUD progress dots
+  stepDots.forEach((dot, idx) => {
+    dot.classList.toggle('lit', idx <= stepIndex);
+  });
+
+  const lantern = targetStop.querySelector('.lantern-node');
+  const trailRect = trailContainer.getBoundingClientRect();
+  const lanternRect = lantern.getBoundingClientRect();
+
+  const topPos = lanternRect.top - trailRect.top - 18;
+  const leftPos = lanternRect.left - trailRect.left + (lanternRect.width / 2);
+
+  // Trigger walking stride animation while moving
+  walkerIcon.classList.add('walking');
+  clearTimeout(walkStopTimeout);
+  walkStopTimeout = setTimeout(() => {
+    walkerIcon.classList.remove('walking');
+  }, 1150);
+
+  walker.style.top = `${topPos}px`;
+  if (window.innerWidth > 720) {
+    walker.style.left = `${leftPos}px`;
+  } else {
+    walker.style.left = `26px`;
+  }
+
+  const messages = [
+    "By your rainy window... 🕯️💜",
+    "Strolling past station lights 🚉",
+    "Sending sky lanterns of peace 🏮",
+    "Smile pannunga madam! 🦋",
+    "Walking hand-in-hand in the park 🌿",
+    "You are my whole universe ✨💝"
+  ];
+  walkerBubble.textContent = messages[stepIndex] || "Walking side by side...";
+}
+
+/* Redraw SVG Winding Curve between checkpoints */
+function drawTrailCurve() {
+  if (window.innerWidth <= 720) return;
+
+  const trailRect = trailContainer.getBoundingClientRect();
+  const points = [{ x: trailRect.width / 2, y: 15 }];
+
+  stops.forEach((stop) => {
+    const lantern = stop.querySelector('.lantern-node');
+    const r = lantern.getBoundingClientRect();
+    points.push({
+      x: r.left - trailRect.left + (r.width / 2),
+      y: r.top - trailRect.top + (r.height / 2)
+    });
+  });
+
+  if (points.length < 2) return;
+
+  let pathStr = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i];
+    const p1 = points[i + 1];
+    const midY = (p0.y + p1.y) / 2;
+    pathStr += ` C ${p0.x} ${midY}, ${p1.x} ${midY}, ${p1.x} ${p1.y}`;
+  }
+
+  document.getElementById('svgGlowPath').setAttribute('d', pathStr);
+  document.getElementById('svgDottedPath').setAttribute('d', pathStr);
+}
+
+/* Open Modal with bespoke scenario diorama & soundscape */
+function openLetter(key, stepNumber) {
+  const data = lettersData[key];
+  if (!data) return;
+
+  stopAutoWalk();
+
+  // Inject bespoke animated scenario stage at the top of the letter
+  modalScenarioStage.innerHTML = buildScenarioHTML(key, true);
+
+  modalTag.textContent = data.tag;
+  modalTitle.textContent = data.title;
+  modalBody.textContent = data.body;
+  letterScrollArea.scrollTop = 0;
+
+  // Configure "Walk to Next Memory" button
+  if (stepNumber < stepOrder.length - 1) {
+    nextCheckpointBtn.style.display = 'inline-block';
+    nextCheckpointBtn.textContent = `Walk to Checkpoint 0${stepNumber + 2} →`;
+  } else {
+    nextCheckpointBtn.style.display = 'inline-block';
+    nextCheckpointBtn.textContent = `Walk Back to Start ↺`;
+  }
+
+  updateWalkerPosition(stepNumber);
+
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  // Play scenario-tailored chord arpeggio
+  playScenarioChord(data.notes);
+}
+
+/* Walk smoothly to the next checkpoint from inside the modal */
+nextCheckpointBtn.addEventListener('click', () => {
+  const nextStep = (currentStep + 1) % stepOrder.length;
+  const nextKey = stepOrder[nextStep];
+  closeModal();
+
+  const targetStop = document.querySelector(`.checkpoint-stop[data-step="${nextStep}"]`);
+  if (targetStop) {
+    targetStop.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  updateWalkerPosition(nextStep);
+
+  setTimeout(() => {
+    openLetter(nextKey, nextStep);
+  }, 850);
+});
+
+/* Close Modal */
+function closeModal() {
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+closeModalBtn.addEventListener('click', closeModal);
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+});
+
+/* Guided Auto-Stroll Walkthrough Mode */
+function stopAutoWalk() {
+  if (autoWalkTimer) {
+    clearInterval(autoWalkTimer);
+    autoWalkTimer = null;
+    autoWalkBtn.classList.remove('active');
+    autoWalkLabel.textContent = "Guided Walk";
+  }
+}
+
+function startAutoWalk() {
+  if (autoWalkTimer) {
+    stopAutoWalk();
+    showToast("Paused our stroll. Tap any lantern anytime 💜");
+    return;
+  }
+
+  autoWalkBtn.classList.add('active');
+  autoWalkLabel.textContent = "Strolling...";
+  showToast("Walking slowly from memory to memory together... 🚶‍♂️🚶‍♀️");
+
+  let step = currentStep;
+  const advance = () => {
+    const targetStop = document.querySelector(`.checkpoint-stop[data-step="${step}"]`);
+    if (targetStop) {
+      targetStop.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      updateWalkerPosition(step);
+      playScenarioChord(lettersData[stepOrder[step]].notes);
+    }
+    if (step >= stepOrder.length - 1) {
+      setTimeout(() => {
+        stopAutoWalk();
+        showToast("Reached the final lantern! Open any letter to read 💝");
+      }, 2400);
+    } else {
+      step++;
+    }
+  };
+
+  advance();
+  autoWalkTimer = setInterval(() => {
+    if (!autoWalkTimer) return;
+    advance();
+  }, 2800);
+}
+
+autoWalkBtn.addEventListener('click', startAutoWalk);
+document.getElementById('heroAutoWalkBtn').addEventListener('click', () => {
+  currentStep = 0;
+  startAutoWalk();
+});
+
+/* HUD Step Dots Quick Jump */
+stepDots.forEach((dot) => {
+  dot.addEventListener('click', () => {
+    stopAutoWalk();
+    const step = Number(dot.dataset.jump);
+    const targetStop = document.querySelector(`.checkpoint-stop[data-step="${step}"]`);
+    if (targetStop) {
+      targetStop.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      updateWalkerPosition(step);
+      playGentleTone(440 + step * 45, 'sine', 0.14, 0.45);
+    }
+  });
+});
+
+/* Scroll-linked Walker Tracking when user scrolls manually */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in-view');
+      if (!autoWalkTimer && !modal.classList.contains('active')) {
+        const step = Number(entry.target.dataset.step);
+        updateWalkerPosition(step);
+      }
+    }
+  });
+}, { threshold: 0.55 });
+
+stops.forEach((stop) => observer.observe(stop));
+
+/* Bind click events on card buttons & lanterns */
+document.querySelectorAll('[data-letter]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.letter;
+    const parentStop = btn.closest('.checkpoint-stop');
+    const step = Number(parentStop.dataset.step);
+    openLetter(key, step);
+  });
+});
+
+stops.forEach((stop) => {
+  const lantern = stop.querySelector('.lantern-node');
+  lantern.addEventListener('click', () => {
+    const key = stop.dataset.id;
+    const step = Number(stop.dataset.step);
+    openLetter(key, step);
+  });
+});
+
+/* Memory Chips Whisper clicks */
+document.querySelectorAll('.moment-chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    const whisper = chip.dataset.whisper;
+    showToast(whisper);
+    playGentleTone(523.25, 'triangle', 0.15, 0.35);
+    createHeartBurst(window.innerWidth / 2, window.innerHeight / 2);
+  });
+});
+
+/* Hug Button in modal */
+sendHugBtn.addEventListener('click', () => {
+  showToast("Tight warm hug received! Never let go. 💜");
+  createHeartBurst(window.innerWidth / 2, window.innerHeight / 2, 30);
+  playMelodicArpeggio();
+});
+
+/* Start Walking Button */
+document.getElementById('startWalkBtn').addEventListener('click', () => {
+  stopAutoWalk();
+  updateWalkerPosition(0);
+  const firstStop = document.querySelector('.checkpoint-stop[data-step="0"]');
+  firstStop.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  playScenarioChord(lettersData.sad.notes);
+});
+
+/* Pure Web Audio Synthesizer (Zero external dependencies) */
+let audioCtx = null;
+function getAudioContext() {
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContext();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playGentleTone(freq, type = 'sine', gainVal = 0.14, duration = 0.55) {
+  try {
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(gainVal, ctx.currentTime + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  } catch (err) {}
+}
+
+function playScenarioChord(notes) {
+  if (!notes) return;
+  notes.forEach((freq, idx) => {
+    setTimeout(() => playGentleTone(freq, 'sine', 0.11, 0.75), idx * 135);
+  });
+}
+
+function playMelodicArpeggio() {
+  const notes = [293.66, 329.63, 369.99, 440.00, 554.37, 587.33];
+  notes.forEach((freq, index) => {
+    setTimeout(() => playGentleTone(freq, 'sine', 0.12, 0.65), index * 140);
+  });
+}
+
+document.getElementById('audioToggleBtn').addEventListener('click', () => {
+  playMelodicArpeggio();
+  showToast("Playing sweet memory chimes for you... 🎶");
+  document.getElementById('audioStatusText').textContent = "Playing ♡";
+});
+
+/* Canvas Particle Animation (Glowing fairy specks & gentle lilac petals) */
+const canvas = document.getElementById('ambienceCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  drawTrailCurve();
+  updateWalkerPosition(currentStep);
+});
+resizeCanvas();
+
+class AmbientParticle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 2.8 + 1;
+    this.speedY = Math.random() * 0.45 + 0.2;
+    this.speedX = (Math.random() - 0.5) * 0.4;
+    this.opacity = Math.random() * 0.6 + 0.2;
+    this.color = Math.random() > 0.4 ? 'rgba(216, 180, 248, ' : 'rgba(255, 209, 237, ';
+    this.angle = Math.random() * Math.PI * 2;
+  }
+  update() {
+    this.y += this.speedY;
+    this.x += Math.sin(this.angle) * 0.5 + this.speedX;
+    this.angle += 0.02;
+    if (this.y > canvas.height) {
+      this.y = -10;
+      this.x = Math.random() * canvas.width;
+    }
+  }
+  draw() {
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = this.color + this.opacity + ')';
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+for (let i = 0; i < 55; i++) particles.push(new AmbientParticle());
+
+let heartBursts = [];
+function createHeartBurst(x, y, count = 18) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 3.2 + 1.5;
+    heartBursts.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 1.2,
+      size: Math.random() * 12 + 10,
+      opacity: 1,
+      symbol: ['💜', '🌸', '✨', '🤍', '💖'][Math.floor(Math.random() * 5)]
+    });
+  }
+}
+
+function animateAmbience() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+
+  for (let i = heartBursts.length - 1; i >= 0; i--) {
+    const h = heartBursts[i];
+    h.x += h.vx;
+    h.y += h.vy;
+    h.opacity -= 0.015;
+    if (h.opacity <= 0) {
+      heartBursts.splice(i, 1);
+    } else {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, h.opacity);
+      ctx.font = `${h.size}px serif`;
+      ctx.fillText(h.symbol, h.x, h.y);
+      ctx.restore();
+    }
+  }
+  requestAnimationFrame(animateAmbience);
+}
+
+window.addEventListener('load', () => {
+  drawTrailCurve();
+  updateWalkerPosition(0);
+  animateAmbience();
+});
+</script>
+</body>
+</html>
