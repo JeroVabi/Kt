@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Kuttu — November 16 Special Day</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Tone.js for Romantic Synth Chimes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Dancing+Script:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --purple-deep: #070210;
+            --purple-glow: #a855f7;
+            --pink-glow: #ec4899;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            background-color: var(--purple-deep);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #f3e8ff;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        .font-romantic {
+            font-family: 'Dancing Script', cursive;
+        }
+        .font-cinzel {
+            font-family: 'Cinzel Decorative', cursive;
+        }
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        /* Cinematic Vignette & Film Grain Overlay */
+        .cinematic-vignette {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background: radial-gradient(circle at center, transparent 45%, rgba(5, 1, 12, 0.85) 100%);
+        }
+        .letterbox-bar {
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 0px;
+            background: #030008;
+            z-index: 5;
+            pointer-events: none;
+            transition: height 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        @media (min-width: 640px) {
+            .letterbox-bar.active {
+                height: 28px;
+            }
+        }
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
+            width: 100%;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
+        .interactive {
+            pointer-events: auto;
+        }
+        .glass-card {
+            background: linear-gradient(145deg, rgba(24, 7, 48, 0.72), rgba(12, 3, 26, 0.85));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(216, 180, 254, 0.25);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(168, 85, 247, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+            transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .modal-enter {
+            opacity: 0;
+            transform: translateY(24px) scale(0.96);
+            pointer-events: none;
+        }
+        .modal-active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        .purple-btn {
+            background: linear-gradient(135deg, #9333ea 0%, #db2777 50%, #7e22ce 100%);
+            background-size: 200% 200%;
+            box-shadow: 0 6px 25px rgba(219, 39, 119, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .purple-btn:hover {
+            transform: translateY(-2px) scale(1.03);
+            background-position: 100% 50%;
+            box-shadow: 0 10px 32px rgba(219, 39, 119, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.65);
+        }
+        .purple-btn:active {
+            transform: translateY(1px) scale(0.97);
+        }
+        .glow-text {
+            text-shadow: 0 0 24px rgba(240, 171, 252, 0.85), 0 0 48px rgba(168, 85, 247, 0.65);
+        }
+        /* Smooth Text Fade Transition */
+        .stage-fade {
+            transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .stage-fade.switching {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        /* Math Step Animation */
+        .math-step {
+            opacity: 0;
+            transform: translateY(16px) scale(0.95);
+            transition: all 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .math-step.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        /* Custom Scrollbar for Love Letter */
+        .letter-scroll {
+            touch-action: pan-y;
+        }
+        .letter-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .letter-scroll::-webkit-scrollbar-track {
+            background: rgba(88, 28, 135, 0.2);
+            border-radius: 8px;
+        }
+        .letter-scroll::-webkit-scrollbar-thumb {
+            background: rgba(192, 132, 252, 0.5);
+            border-radius: 8px;
+        }
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 18px rgba(236, 72, 153, 0.65)); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 32px rgba(168, 85, 247, 1)); }
+        }
+        .heart-pulse {
+            animation: pulse-slow 2.2s infinite ease-in-out;
+        }
+        .floating-heart {
+            position: fixed;
+            pointer-events: none;
+            z-index: 50;
+            animation: floatUp 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-200px) scale(1.45) rotate(18deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3D WebGL Canvas Container -->
+    <div id="canvas-container"></div>
+    <div class="cinematic-vignette"></div>
+    <div id="letterbox-top" class="letterbox-bar top-0 active"></div>
+    <div id="letterbox-bottom" class="letterbox-bar bottom-0 active"></div>
+
+    <!-- Top Navigation & Progress Header -->
+    <div class="ui-layer p-2.5 sm:p-5 md:py-6 gap-1.5 sm:gap-2">
+        <header class="w-full max-w-4xl mx-auto flex items-center justify-between glass-card px-3 py-2 sm:px-5 sm:py-2.5 rounded-2xl interactive shrink-0">
+            <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/40 shrink-0">
+                    <svg class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <h1 class="text-[11px] sm:text-sm font-bold tracking-wider text-purple-100 uppercase truncate">For My Kuttu</h1>
+                    <p id="chapter-subtitle" class="text-[10px] sm:text-xs text-purple-300 truncate">Chapter 1 • The First Glance</p>
+                </div>
+            </div>
+
+            <!-- Step Indicators (Visible on Both Mobile & Desktop) -->
+            <div class="flex items-center space-x-1 sm:space-x-2 shrink-0 mx-1" id="step-dots">
+                <button onclick="goToStage(0)" aria-label="Stage 1" class="w-5 sm:w-8 h-1.5 sm:h-2 rounded-full transition-all duration-500 bg-pink-500"></button>
+                <button onclick="goToStage(1)" aria-label="Stage 2" class="w-2 sm:w-3 h-1.5 sm:h-2 rounded-full transition-all duration-500 bg-purple-800"></button>
+                <button onclick="goToStage(2)" aria-label="Stage 3" class="w-2 sm:w-3 h-1.5 sm:h-2 rounded-full transition-all duration-500 bg-purple-800"></button>
+                <button onclick="goToStage(3)" aria-label="Stage 4" class="w-2 sm:w-3 h-1.5 sm:h-2 rounded-full transition-all duration-500 bg-purple-800"></button>
+                <button onclick="goToStage(4)" aria-label="Stage 5" class="w-2 sm:w-3 h-1.5 sm:h-2 rounded-full transition-all duration-500 bg-purple-800"></button>
+                <button onclick="goToStage(5)" aria-label="Stage 6" class="w-2 sm:w-3 h-1.5 sm:h-2 rounded-full transition-all duration-500 bg-purple-800"></button>
+            </div>
+
+            <!-- Sound & Camera Hint -->
+            <div class="flex items-center space-x-2 shrink-0">
+                <span class="hidden lg:inline-block text-xs text-purple-300/80 mr-1">Touch / Drag 3D View</span>
+                <button id="audio-btn" onclick="toggleMute()" class="p-1.5 sm:p-2 rounded-xl bg-purple-900/60 hover:bg-purple-800/80 border border-purple-400/30 text-purple-200 transition" title="Toggle Romantic Chimes">
+                    <svg id="sound-on-icon" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Center Area for Sky Banner & Cinematic Modals (Strictly isolated to prevent any overlap) -->
+        <main class="relative flex-1 min-h-0 flex items-center justify-center w-full max-w-2xl mx-auto overflow-hidden px-1 py-1">
+            <!-- Top-docked Floating Sky Date Banner (Positioned at top of main area so it never overlaps 3D cakes or modals) -->
+            <div id="sky-date-banner" class="absolute top-1 sm:top-3 inset-x-0 z-10 pointer-events-none flex flex-col items-center justify-center text-center transition-all duration-700 ease-out opacity-0 transform -translate-y-4 px-3">
+                <span class="px-3 py-0.5 rounded-full bg-purple-950/80 border border-purple-300/40 text-[9px] sm:text-xs uppercase tracking-[0.25em] text-purple-200 mb-1 shadow-lg backdrop-blur-md">Written In The Stars</span>
+                <h2 id="sky-date-title" class="font-cinzel text-3xl sm:text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-300 to-amber-200 glow-text tracking-wider leading-tight">
+                    JULY 5
+                </h2>
+                <p id="sky-date-desc" class="font-romantic text-xl sm:text-2xl md:text-3xl text-pink-300 drop-shadow">The moment our paths crossed...</p>
+            </div>
+
+            <!-- Stage 4: Destiny Calculation Modal Overlay -->
+            <div id="calculation-modal" class="hidden relative z-20 w-full max-w-lg glass-card rounded-3xl p-3.5 sm:p-5 interactive modal-enter max-h-full overflow-y-auto letter-scroll">
+                <div class="text-center mb-2 sm:mb-3">
+                    <span class="text-[10px] sm:text-xs uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-purple-500/30 border border-purple-400/40 text-purple-200">Numerology of Us</span>
+                    <h3 class="font-cinzel text-lg sm:text-2xl font-bold text-white mt-1 glow-text">The Destiny Formula</h3>
+                </div>
+
+                <div class="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
+                    <!-- Step 1: Her Birthday -->
+                    <div id="calc-1" class="math-step flex items-center justify-between p-2 sm:p-2.5 rounded-2xl bg-purple-950/80 border border-purple-500/30">
+                        <div class="flex items-center space-x-2 sm:space-x-3">
+                            <span class="text-base sm:text-xl">🎂</span>
+                            <div>
+                                <p class="font-semibold text-pink-300">Her Birthday (June 4)</p>
+                                <p class="text-[10px] sm:text-[11px] text-purple-300">Month 6 × Day 4</p>
+                            </div>
+                        </div>
+                        <div class="font-mono text-xs sm:text-lg font-bold text-pink-400 bg-purple-900/60 px-2.5 py-1 rounded-xl border border-pink-400/30 shrink-0">
+                            6 × 4 = <span class="text-white">24</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: My Birthday -->
+                    <div id="calc-2" class="math-step flex items-center justify-between p-2 sm:p-2.5 rounded-2xl bg-purple-950/80 border border-purple-500/30">
+                        <div class="flex items-center space-x-2 sm:space-x-3">
+                            <span class="text-base sm:text-xl">🕯️</span>
+                            <div>
+                                <p class="font-semibold text-purple-300">My Birthday (Oct 11)</p>
+                                <p class="text-[10px] sm:text-[11px] text-purple-300">Day 11 × Month 10</p>
+                            </div>
+                        </div>
+                        <div class="font-mono text-xs sm:text-lg font-bold text-purple-300 bg-purple-900/60 px-2.5 py-1 rounded-xl border border-purple-400/30 shrink-0">
+                            11 × 10 = <span class="text-white">110</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Combined Number -->
+                    <div id="calc-3" class="math-step flex items-center justify-between p-2 sm:p-2.5 rounded-2xl bg-gradient-to-r from-purple-900/80 to-pink-900/60 border border-pink-400/40">
+                        <div class="flex items-center space-x-2 sm:space-x-3">
+                            <span class="text-base sm:text-xl">✨</span>
+                            <div>
+                                <p class="font-semibold text-white">Our Combined Magic Sum</p>
+                                <p class="text-[10px] sm:text-[11px] text-purple-200">Adding our birthday numbers</p>
+                            </div>
+                        </div>
+                        <div class="font-mono text-xs sm:text-lg font-bold text-amber-300 bg-black/35 px-2.5 py-1 rounded-xl shrink-0">
+                            24 + 110 = <span class="text-white underline decoration-pink-500">134</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Counting 134 Days -->
+                    <div id="calc-4" class="math-step p-2.5 sm:p-3.5 rounded-2xl bg-gradient-to-br from-purple-600/35 via-fuchsia-600/35 to-pink-600/35 border border-pink-300/60 text-center">
+                        <p class="text-[10px] sm:text-xs text-purple-200">From <span class="font-bold text-white">June 5</span> &bull; Counting <span class="font-bold text-amber-300">134th</span> Special Milestone</p>
+                        <div class="my-1 sm:my-1.5 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                            <span class="text-[11px] sm:text-xs px-2 py-0.5 rounded-lg bg-purple-900/80 text-purple-200">June 5</span>
+                            <span class="text-pink-400 font-bold text-[11px] sm:text-xs">+ 134th Day ➔</span>
+                            <span class="font-cinzel text-base sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-pink-200 to-purple-200 glow-text">
+                                NOVEMBER 16
+                            </span>
+                        </div>
+                        <p class="font-romantic text-lg sm:text-2xl text-pink-200">Wish You The Special Day, My Kuttu! 💜</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 5: Love Letter Modal for Kuttu -->
+            <div id="letter-modal" class="hidden relative z-20 w-full max-w-xl glass-card rounded-3xl p-4 sm:p-6 interactive modal-enter border-2 border-purple-400/50 max-h-full flex flex-col">
+                <div class="flex items-center justify-between border-b border-purple-500/30 pb-2 mb-2.5 shrink-0">
+                    <div>
+                        <span class="text-[10px] sm:text-xs uppercase tracking-widest text-pink-400 font-semibold">November 16 • Our Special Day</span>
+                        <h3 class="font-romantic text-2xl sm:text-3xl text-white glow-text">My Dearest Kuttu,</h3>
+                    </div>
+                    <div class="text-xl sm:text-2xl">💌</div>
+                </div>
+
+                <div class="letter-scroll overflow-y-auto pr-1.5 space-y-2 sm:space-y-2.5 text-purple-100/95 text-xs sm:text-sm leading-relaxed">
+                    <p>
+                        Every time I look back at <strong class="text-pink-300">July 5</strong>, my heart still skips a beat—just like that exact cinematic moment when I was riding my bike, saw you crossing the road, our eyes met, and the purple sky above sealed our story forever.
+                    </p>
+                    <p>
+                        Even the universe secretly wrote our story in numbers. When your <strong class="text-pink-300">June 4</strong> (<span class="font-mono text-[11px]">6 × 4 = 24</span>) meets my <strong class="text-purple-300">October 11</strong> (<span class="font-mono text-[11px]">11 × 10 = 110</span>), they create <strong class="text-amber-300">134</strong>—guiding us from <strong class="text-purple-200">June 5</strong> straight to our 134th magical milestone on <strong class="text-pink-300">November 16</strong>.
+                    </p>
+                    <p>
+                        You are my favorite melody, my brightest starry sky, and the sweetest blessing I could ever ask for. Whether we are celebrating birthdays with cake or crossing paths in this busy world, my eyes will always search only for you.
+                    </p>
+                    <p class="font-romantic text-xl sm:text-2xl text-pink-300 pt-1 text-right">
+                        Wish you the special day, my Kuttu! <br>
+                        <span class="text-xs sm:text-base text-purple-300 font-sans not-italic">— Forever Yours 💜</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Stage 6: End Interaction — Fill The Heart For Kuttu -->
+            <div id="heart-modal" class="hidden relative z-20 w-full max-w-md glass-card rounded-3xl p-4 sm:p-5 text-center interactive modal-enter max-h-full overflow-y-auto letter-scroll">
+                <span class="text-[10px] sm:text-xs uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-pink-500/20 border border-pink-400/40 text-pink-200">Final Interactive Promise</span>
+                <h3 class="font-cinzel text-lg sm:text-2xl font-bold text-white mt-1 glow-text">Fill Our Purple Heart</h3>
+                <p id="heart-instruction" class="text-[11px] sm:text-xs text-purple-200 mt-0.5">Tap repeatedly on the heart below to fill it with infinite love for Kuttu!</p>
+
+                <!-- Interactive SVG Liquid Fill Heart -->
+                <div class="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto my-2 sm:my-3 flex items-center justify-center cursor-pointer select-none active:scale-95 transition-transform" id="heart-tap-area" onclick="fillHeartStep(event)">
+                    <svg class="w-28 h-28 sm:w-36 sm:h-36 heart-pulse" viewBox="0 0 100 100">
+                        <defs>
+                            <clipPath id="heart-clip">
+                                <path d="M50 88.9L16.7 55.6C7.2 46.1 7.2 30.9 16.7 21.4s24.7-9.5 33.3 0L50 21.4l0 0c8.6-9.5 23.8-9.5 33.3 0s9.5 24.7 0 34.2L50 88.9z"/>
+                            </clipPath>
+                            <linearGradient id="liquid-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#f0abfc" />
+                                <stop offset="50%" stop-color="#a855f7" />
+                                <stop offset="100%" stop-color="#ec4899" />
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Empty Heart Background -->
+                        <path d="M50 88.9L16.7 55.6C7.2 46.1 7.2 30.9 16.7 21.4s24.7-9.5 33.3 0L50 21.4l0 0c8.6-9.5 23.8-9.5 33.3 0s9.5 24.7 0 34.2L50 88.9z" 
+                              fill="rgba(59, 7, 100, 0.75)" stroke="#d8b4fe" stroke-width="3"/>
+
+                        <!-- Rising Purple/Pink Fill Rect inside Heart Clip -->
+                        <g clip-path="url(#heart-clip)">
+                            <rect id="heart-fill-rect" x="0" y="90" width="100" height="90" fill="url(#liquid-grad)" class="transition-all duration-500 ease-out"/>
+                        </g>
+
+                        <!-- Glossy Highlight -->
+                        <path d="M50 88.9L16.7 55.6C7.2 46.1 7.2 30.9 16.7 21.4s24.7-9.5 33.3 0L50 21.4l0 0c8.6-9.5 23.8-9.5 33.3 0s9.5 24.7 0 34.2L50 88.9z" 
+                              fill="none" stroke="#f5d0fe" stroke-width="2.5"/>
+                    </svg>
+                    <span id="heart-pct-text" class="absolute font-bold text-sm sm:text-base text-white drop-shadow">0%</span>
+                </div>
+
+                <div id="heart-complete-banner" class="hidden mt-1 p-2 sm:p-2.5 rounded-2xl bg-gradient-to-r from-purple-600/60 to-pink-600/60 border border-pink-300/60">
+                    <p class="font-romantic text-lg sm:text-2xl text-white">100% Filled With Love For My Kuttu! 💜✨</p>
+                    <p class="text-[10px] sm:text-xs text-purple-100">Wish You The Special Day • November 16 Forever</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Story Card & Controls -->
+        <footer class="w-full max-w-3xl mx-auto glass-card p-3 sm:p-4 rounded-3xl interactive shrink-0">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4">
+                <div id="footer-text-wrap" class="text-center sm:text-left flex-1 stage-fade min-w-0">
+                    <div class="flex items-center justify-center sm:justify-start space-x-2 mb-0.5">
+                        <span id="stage-badge" class="px-2.5 py-0.5 text-[10px] sm:text-xs font-bold uppercase rounded-full bg-pink-500/30 text-pink-200 border border-pink-400/40">
+                            July 5 • The Crossing
+                        </span>
+                        <span class="sm:hidden text-[10px] text-purple-300/70">Swipe ⇄</span>
+                    </div>
+                    <h2 id="stage-title" class="text-xs sm:text-lg font-bold text-white leading-snug truncate sm:whitespace-normal">
+                        Riding My Bike & Seeing Her Cross The Road
+                    </h2>
+                    <p id="stage-description" class="text-[11px] sm:text-xs text-purple-200/90 mt-0.5 line-clamp-1 sm:line-clamp-2">
+                        Watch the cinematic 3D scene as my bike approaches the glowing crosswalk, she walks across, and the camera tilts up to the starry sky to reveal July 5.
+                    </p>
+                </div>
+
+                <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto space-x-2 sm:space-x-3 shrink-0">
+                    <button id="prev-btn" onclick="prevStage()" class="px-3 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-purple-900/70 hover:bg-purple-800 text-purple-200 border border-purple-500/40 text-xs sm:text-sm font-semibold transition disabled:opacity-35" disabled>
+                        ← Back
+                    </button>
+                    <button id="next-btn" onclick="nextStage()" class="purple-btn flex-1 sm:flex-initial justify-center px-4 py-2 sm:px-6 sm:py-2.5 rounded-2xl text-white text-xs sm:text-sm font-bold tracking-wide flex items-center space-x-1.5">
+                        <span id="next-btn-text">Her Birthday (June 4)</span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        /**************************************************************
+         * 1. STORY STAGES & TIMELINE DATA
+         **************************************************************/
+        const STAGES = [
+            {
+                subtitle: "Chapter 1 • The First Glance",
+                badge: "July 5 • The Crossing",
+                title: "Riding My Bike & Seeing Her Cross The Road",
+                description: "As I ride my bike to the crosswalk and see her crossing the road, time stops and the camera pans up to the starry purple sky showing July 5.",
+                nextText: "Her Birthday (June 4)",
+                skyTitle: "JULY 5",
+                skyDesc: "The unforgettable day I saw you cross the road..."
+            },
+            {
+                subtitle: "Chapter 2 • Her Queen Day",
+                badge: "June 4 • Her Birthday",
+                title: "Celebrating Her Birthday With Cake — June 4",
+                description: "A royal purple & pink two-tier birthday cake glowing with candles for her special day on June 4 (6 × 4).",
+                nextText: "My Birthday (Oct 11)",
+                skyTitle: "JUNE 4",
+                skyDesc: "Happy Birthday to the girl who stole my heart 🎂"
+            },
+            {
+                subtitle: "Chapter 3 • My Birthday",
+                badge: "October 11 • My Birthday",
+                title: "Celebrating My Birthday With Cake — Oct 11",
+                description: "Glowing violet & gold birthday cake celebrating October 11 (11 × 10), completing the other half of our equation.",
+                nextText: "Destiny Calculation",
+                skyTitle: "OCTOBER 11",
+                skyDesc: "Two souls born to meet in one cosmic equation 🕯️"
+            },
+            {
+                subtitle: "Chapter 4 • The Secret Numbers",
+                badge: "6×4 + 11×10 = 134 • Nov 16",
+                title: "Our Destiny Calculation: 134th Milestone",
+                description: "6 × 4 = 24 and 11 × 10 = 110. Together they make 134! From June 5, the 134th special milestone brings us to November 16.",
+                nextText: "Read Love Letter",
+                skyTitle: "134 • NOV 16",
+                skyDesc: "Wish you the special day, my Kuttu!"
+            },
+            {
+                subtitle: "Chapter 5 • From My Heart",
+                badge: "November 16 • My Kuttu",
+                title: "A Love Letter For My Kuttu",
+                description: "Every memory from July 5, June 4, October 11, and June 5 leading up to November 16 is written for you.",
+                nextText: "Fill Our Heart 💜",
+                skyTitle: "MY KUTTU",
+                skyDesc: "Wish you the special day!"
+            },
+            {
+                subtitle: "Chapter 6 • Forever Interaction",
+                badge: "Interactive Finale • Heart Filled",
+                title: "Fill The 3D Purple Heart With Love",
+                description: "Tap the glowing heart to fill it to 100% and watch our 3D purple universe burst with celebration!",
+                nextText: "Replay Our Story ↺",
+                skyTitle: "NOVEMBER 16",
+                skyDesc: "Forever & Always, My Kuttu 💜"
+            }
+        ];
+
+        let currentStage = 0;
+        let stageTimer = 0;
+        let heartFillProgress = 0;
+        let isMuted = false;
+        let synth = null;
+
+        /**************************************************************
+         * 2. TONE.JS ROMANTIC SYNTH CHIMES
+         **************************************************************/
+        function initAudio() {
+            if (synth) return;
+            try {
+                synth = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.05, decay: 0.3, sustain: 0.2, release: 1.5 }
+                }).toDestination();
+                synth.volume.value = -10;
+            } catch (e) {
+                // Audio context fallback
+            }
+        }
+
+        function playChime(notes = ["C5", "E5", "G5", "B5"]) {
+            if (isMuted) return;
+            try {
+                initAudio();
+                if (Tone.context.state !== 'running') {
+                    Tone.context.resume();
+                }
+                const now = Tone.now();
+                notes.forEach((n, idx) => {
+                    synth.triggerAttackRelease(n, "8n", now + idx * 0.11);
+                });
+            } catch (e) {}
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('audio-btn');
+            btn.classList.toggle('opacity-50', isMuted);
+            if (!isMuted) playChime(["E5", "G#5", "B5"]);
+        }
+
+        /**************************************************************
+         * 3. THREE.JS REALISTIC 3D SCENE SETUP (PURPLE THEME)
+         **************************************************************/
+        let scene, camera, renderer, clock;
+        let roadGroup, cityGroup, bikeGroup, girlGroup, herCakeGroup, myCakeGroup, heart3DGroup, starField;
+        let riderHeadGroup, girlHeadGroup;
+        let girlLeftLeg, girlRightLeg, girlLeftArm, girlRightArm;
+        let frontWheelMesh, backWheelMesh;
+        let flameMeshes = [];
+
+        // Camera smooth damped interpolation targets
+        let camPosTarget = new THREE.Vector3(2.2, 2.7, 9.2);
+        let camLookTarget = new THREE.Vector3(0, 1.3, 0.8);
+        let currentLook = new THREE.Vector3(0, 1.3, 0.8);
+
+        // User orbit offset via drag/touch + swipe detection
+        let isDragging = false;
+        let prevMouse = { x: 0, y: 0 };
+        let touchStartPos = { x: 0, y: 0, time: 0 };
+        let orbitOffset = { x: 0, y: 0 };
+
+        function getMobileZOffset() {
+            // Pull camera back smoothly on narrow portrait screens so full bike & crosswalk fit
+            const aspect = window.innerWidth / window.innerHeight;
+            return aspect < 0.75 ? (0.75 - aspect) * 11.5 : 0;
+        }
+
+        function initThreeScene() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x070210);
+            scene.fog = new THREE.FogExp2(0x070210, 0.018);
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
+            camera.position.set(0, 3.2, 11 + getMobileZOffset());
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.15;
+            container.appendChild(renderer.domElement);
+
+            clock = new THREE.Clock();
+
+            // Realistic Cinematic Lighting in Royal Purple, Magenta & Warm Gold
+            const hemiLight = new THREE.HemisphereLight(0xc084fc, 0x1e0538, 0.85);
+            scene.add(hemiLight);
+
+            const dirLight = new THREE.DirectionalLight(0xf5d0fe, 1.45);
+            dirLight.position.set(8, 18, 12);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 1024;
+            dirLight.shadow.mapSize.height = 1024;
+            scene.add(dirLight);
+
+            const pinkPointLight = new THREE.PointLight(0xec4899, 2.5, 28);
+            pinkPointLight.position.set(-5, 4, 3);
+            scene.add(pinkPointLight);
+
+            const purplePointLight = new THREE.PointLight(0xa855f7, 2.5, 28);
+            purplePointLight.position.set(5, 5, -3);
+            scene.add(purplePointLight);
+
+            // Build Realistic 3D World Groups
+            createPurpleStarrySky();
+            createRoadAndStreet();
+            createCinematicCitySkyline();
+            createBikeWithMe();
+            createGirlCrossing();
+            createBirthdayCakes();
+            create3DFinaleHeart();
+
+            // Mouse & Touch Orbit Controls + Mobile Swipe Gesture
+            window.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.interactive')) return;
+                isDragging = true;
+                prevMouse = { x: e.clientX, y: e.clientY };
+            });
+            window.addEventListener('mouseup', () => isDragging = false);
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const dx = (e.clientX - prevMouse.x) * 0.007;
+                const dy = (e.clientY - prevMouse.y) * 0.005;
+                orbitOffset.x = Math.max(-3.0, Math.min(3.0, orbitOffset.x - dx));
+                orbitOffset.y = Math.max(-1.2, Math.min(2.2, orbitOffset.y + dy));
+                prevMouse = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('touchstart', (e) => {
+                if (e.target.closest('.letter-scroll') || e.target.closest('button') || e.target.closest('#heart-tap-area')) return;
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                    touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY, time: Date.now() };
+                }
+            }, { passive: true });
+
+            window.addEventListener('touchend', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                if (e.changedTouches.length === 1) {
+                    const dx = e.changedTouches[0].clientX - touchStartPos.x;
+                    const dy = e.changedTouches[0].clientY - touchStartPos.y;
+                    const dt = Date.now() - touchStartPos.time;
+                    // Quick horizontal swipe on mobile changes chapters smoothly
+                    if (dt < 320 && Math.abs(dx) > 65 && Math.abs(dx) > Math.abs(dy) * 1.8) {
+                        if (dx < 0 && currentStage < STAGES.length - 1) nextStage();
+                        else if (dx > 0 && currentStage > 0) prevStage();
+                    }
+                }
+            });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isDragging || e.touches.length !== 1) return;
+                const dx = (e.touches[0].clientX - prevMouse.x) * 0.007;
+                const dy = (e.touches[0].clientY - prevMouse.y) * 0.005;
+                orbitOffset.x = Math.max(-2.6, Math.min(2.6, orbitOffset.x - dx));
+                orbitOffset.y = Math.max(-1.0, Math.min(2.0, orbitOffset.y + dy));
+                prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }, { passive: true });
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // Create Starfield & Glowing Full Moon in the Upper Sky
+        function createPurpleStarrySky() {
+            const starGeo = new THREE.BufferGeometry();
+            const count = 1200;
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 110;
+                positions[i * 3 + 1] = Math.random() * 50 + 2;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 90 - 15;
+
+                const c = new THREE.Color().setHSL(0.76 + Math.random() * 0.16, 0.9, 0.75 + Math.random() * 0.25);
+                colors[i * 3] = c.r;
+                colors[i * 3 + 1] = c.g;
+                colors[i * 3 + 2] = c.b;
+            }
+            starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            starGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const starMat = new THREE.PointsMaterial({
+                size: 0.24,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.92
+            });
+            starField = new THREE.Points(starGeo, starMat);
+            scene.add(starField);
+
+            // Romantic Purple/Pink Full Moon high up in the sky
+            const moonGeo = new THREE.SphereGeometry(2.8, 32, 32);
+            const moonMat = new THREE.MeshBasicMaterial({ color: 0xfdf4ff });
+            const moon = new THREE.Mesh(moonGeo, moonMat);
+            moon.position.set(0, 14.5, -24);
+            scene.add(moon);
+
+            // Multi-layered Atmospheric Moon Halo
+            const haloGeo = new THREE.SphereGeometry(3.8, 32, 32);
+            const haloMat = new THREE.MeshBasicMaterial({
+                color: 0xe879f9,
+                transparent: true,
+                opacity: 0.24
+            });
+            const halo = new THREE.Mesh(haloGeo, haloMat);
+            halo.position.copy(moon.position);
+            scene.add(halo);
+
+            const outerHalo = new THREE.Mesh(
+                new THREE.SphereGeometry(5.2, 32, 32),
+                new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.12 })
+            );
+            outerHalo.position.copy(moon.position);
+            scene.add(outerHalo);
+        }
+
+        // Create Realistic Wet Reflective Asphalt Road, Crosswalk & Bokeh Streetlights
+        function createRoadAndStreet() {
+            roadGroup = new THREE.Group();
+
+            // Main Wet Asphalt Road with subtle specular reflection
+            const roadGeo = new THREE.PlaneGeometry(30, 44);
+            const roadMat = new THREE.MeshStandardMaterial({
+                color: 0x120722,
+                roughness: 0.28,
+                metalness: 0.55
+            });
+            const road = new THREE.Mesh(roadGeo, roadMat);
+            road.rotation.x = -Math.PI / 2;
+            road.receiveShadow = true;
+            roadGroup.add(road);
+
+            // Glowing Center Neon Road Dividers
+            const laneMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.45 });
+            for (let z = -18; z <= 18; z += 4) {
+                if (Math.abs(z) < 2.5) continue;
+                const dash = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 1.8), laneMat);
+                dash.rotation.x = -Math.PI / 2;
+                dash.position.set(0, 0.015, z);
+                roadGroup.add(dash);
+            }
+
+            // Sidewalks with Curb
+            const walkGeo = new THREE.BoxGeometry(6, 0.28, 44);
+            const walkMat = new THREE.MeshStandardMaterial({ color: 0x240b4c, roughness: 0.65, metalness: 0.2 });
+            const leftWalk = new THREE.Mesh(walkGeo, walkMat);
+            leftWalk.position.set(-7.8, 0.14, 0);
+            leftWalk.receiveShadow = true;
+            roadGroup.add(leftWalk);
+
+            const rightWalk = new THREE.Mesh(walkGeo, walkMat);
+            rightWalk.position.set(7.8, 0.14, 0);
+            rightWalk.receiveShadow = true;
+            roadGroup.add(rightWalk);
+
+            // Zebra Crosswalk Stripes where she crosses
+            const stripeGeo = new THREE.BoxGeometry(0.65, 0.04, 2.3);
+            const stripeMat = new THREE.MeshStandardMaterial({
+                color: 0xfaf5ff,
+                emissive: 0xc084fc,
+                emissiveIntensity: 0.35,
+                roughness: 0.3
+            });
+            for (let x = -4.2; x <= 4.2; x += 1.2) {
+                const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+                stripe.position.set(x, 0.02, 0);
+                roadGroup.add(stripe);
+            }
+
+            // Glowing Street Lamps along the road with Volumetric Light Cones
+            const poleMat = new THREE.MeshStandardMaterial({ color: 0x3b0764, metalness: 0.8, roughness: 0.2 });
+            const bulbMat = new THREE.MeshBasicMaterial({ color: 0xf9a8d4 });
+            const coneMat = new THREE.MeshBasicMaterial({
+                color: 0xe879f9,
+                transparent: true,
+                opacity: 0.07,
+                side: THREE.DoubleSide
+            });
+
+            [-5.1, 5.1].forEach(xPos => {
+                [-6, 3.5].forEach(zPos => {
+                    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.13, 5.0, 12), poleMat);
+                    pole.position.set(xPos, 2.5, zPos);
+                    roadGroup.add(pole);
+
+                    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.08, 0.08), poleMat);
+                    arm.position.set(xPos * 0.91, 4.95, zPos);
+                    roadGroup.add(arm);
+
+                    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.26, 16, 16), bulbMat);
+                    bulb.position.set(xPos * 0.84, 4.85, zPos);
+                    roadGroup.add(bulb);
+
+                    const lightCone = new THREE.Mesh(new THREE.ConeGeometry(2.1, 4.8, 20, 1, true), coneMat);
+                    lightCone.position.set(xPos * 0.84, 2.4, zPos);
+                    roadGroup.add(lightCone);
+                });
+            });
+
+            scene.add(roadGroup);
+        }
+
+        // Create Realistic Night City Skyline & Romantic Purple Trees
+        function createCinematicCitySkyline() {
+            cityGroup = new THREE.Group();
+            const bldgMat = new THREE.MeshStandardMaterial({ color: 0x14062b, roughness: 0.7, metalness: 0.3 });
+            const windowPink = new THREE.MeshBasicMaterial({ color: 0xf472b6 });
+            const windowPurple = new THREE.MeshBasicMaterial({ color: 0xc084fc });
+
+            const bldgPositions = [
+                { x: -11, z: -8, w: 3.5, h: 9, d: 3.5 },
+                { x: -12, z: -2, w: 3.2, h: 7, d: 3.2 },
+                { x: -11, z: 4, w: 3.5, h: 6.5, d: 3.2 },
+                { x: 11, z: -9, w: 3.8, h: 10, d: 3.5 },
+                { x: 12, z: -2.5, w: 3.2, h: 7.5, d: 3.2 },
+                { x: 11, z: 4, w: 3.5, h: 6, d: 3.2 }
+            ];
+
+            bldgPositions.forEach((b, idx) => {
+                const mesh = new THREE.Mesh(new THREE.BoxGeometry(b.w, b.h, b.d), bldgMat);
+                mesh.position.set(b.x, b.h / 2, b.z);
+                cityGroup.add(mesh);
+
+                // Glowing bokeh city windows
+                for (let wy = 1.5; wy < b.h - 1; wy += 1.4) {
+                    const win = new THREE.Mesh(
+                        new THREE.PlaneGeometry(0.45, 0.65),
+                        (idx + Math.floor(wy)) % 2 === 0 ? windowPink : windowPurple
+                    );
+                    const faceX = b.x < 0 ? b.x + b.w / 2 + 0.02 : b.x - b.w / 2 - 0.02;
+                    win.position.set(faceX, wy, b.z + (Math.sin(wy * 3) * 0.6));
+                    win.rotation.y = b.x < 0 ? Math.PI / 2 : -Math.PI / 2;
+                    cityGroup.add(win);
+                }
+            });
+
+            roadGroup.add(cityGroup);
+        }
+
+        // Create Realistic 3D Sport Motorcycle & Sculpted Human Rider ("Me in Bike")
+        function createBikeWithMe() {
+            bikeGroup = new THREE.Group();
+
+            const darkMetal = new THREE.MeshStandardMaterial({ color: 0x1e1b4b, metalness: 0.85, roughness: 0.25 });
+            const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.15 });
+            const purpleBodyMat = new THREE.MeshStandardMaterial({ color: 0x7e22ce, metalness: 0.7, roughness: 0.2 });
+            const neonRimMat = new THREE.MeshBasicMaterial({ color: 0xec4899 });
+            const skinMat = new THREE.MeshStandardMaterial({ color: 0xf4c29f, roughness: 0.45 });
+            const leatherJacketMat = new THREE.MeshStandardMaterial({ color: 0x2e1065, roughness: 0.35, metalness: 0.2 });
+            const denimMat = new THREE.MeshStandardMaterial({ color: 0x172554, roughness: 0.75 });
+            const bootMat = new THREE.MeshStandardMaterial({ color: 0x0f071e, roughness: 0.3, metalness: 0.3 });
+
+            // Front & Rear Wheels with Brake Discs & Spokes
+            const tireGeo = new THREE.TorusGeometry(0.46, 0.15, 20, 36);
+            frontWheelMesh = new THREE.Mesh(tireGeo, darkMetal);
+            frontWheelMesh.rotation.y = Math.PI / 2;
+            frontWheelMesh.position.set(0, 0.54, -1.18);
+            bikeGroup.add(frontWheelMesh);
+
+            const frontRim = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.035, 12, 24), neonRimMat);
+            frontWheelMesh.add(frontRim);
+            const brakeDisc = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.03, 20), chromeMat);
+            brakeDisc.rotation.x = Math.PI / 2;
+            frontWheelMesh.add(brakeDisc);
+
+            backWheelMesh = new THREE.Mesh(tireGeo, darkMetal);
+            backWheelMesh.rotation.y = Math.PI / 2;
+            backWheelMesh.position.set(0, 0.54, 1.15);
+            bikeGroup.add(backWheelMesh);
+
+            const backRim = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.035, 12, 24), neonRimMat);
+            backWheelMesh.add(backRim);
+
+            // Dual Front Forks, Triple Tree & Mirrors
+            [-0.14, 0.14].forEach(xSide => {
+                const fork = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.032, 1.15, 14), chromeMat);
+                fork.position.set(xSide, 0.94, -0.96);
+                fork.rotation.x = 0.32;
+                bikeGroup.add(fork);
+            });
+
+            const handlebar = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.86, 12), chromeMat);
+            handlebar.rotation.z = Math.PI / 2;
+            handlebar.position.set(0, 1.38, -0.68);
+            bikeGroup.add(handlebar);
+
+            // Handlebar Grips & Side Mirrors
+            [-0.4, 0.4].forEach(xSide => {
+                const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.14, 12), bootMat);
+                grip.rotation.z = Math.PI / 2;
+                grip.position.set(xSide, 1.38, -0.68);
+                bikeGroup.add(grip);
+
+                const mirrorStem = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.18, 8), chromeMat);
+                mirrorStem.position.set(xSide * 0.95, 1.48, -0.72);
+                mirrorStem.rotation.z = xSide > 0 ? -0.4 : 0.4;
+                bikeGroup.add(mirrorStem);
+            });
+
+            // Sculpted Fuel Tank, Engine Block, Seat & LED Headlight
+            const engineBlock = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.42, 0.65), darkMetal);
+            engineBlock.position.set(0, 0.75, -0.1);
+            bikeGroup.add(engineBlock);
+
+            const fuelTank = new THREE.Mesh(new THREE.SphereGeometry(0.34, 24, 20), purpleBodyMat);
+            fuelTank.scale.set(0.85, 0.72, 1.55);
+            fuelTank.position.set(0, 1.12, -0.22);
+            fuelTank.castShadow = true;
+            bikeGroup.add(fuelTank);
+
+            const seat = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.14, 0.78), bootMat);
+            seat.position.set(0, 1.06, 0.42);
+            seat.rotation.x = 0.1;
+            bikeGroup.add(seat);
+
+            // Twin Exhaust Pipes
+            [-0.22, 0.22].forEach(xSide => {
+                const exhaust = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.95, 14), chromeMat);
+                exhaust.rotation.x = Math.PI / 2 + 0.18;
+                exhaust.position.set(xSide, 0.65, 0.68);
+                bikeGroup.add(exhaust);
+            });
+
+            // Glowing Front Headlight & Beam
+            const headlight = new THREE.Mesh(
+                new THREE.SphereGeometry(0.16, 16, 16),
+                new THREE.MeshBasicMaterial({ color: 0xfdf4ff })
+            );
+            headlight.scale.set(1.2, 0.85, 0.6);
+            headlight.position.set(0, 1.16, -0.96);
+            bikeGroup.add(headlight);
+
+            const headBeam = new THREE.Mesh(
+                new THREE.ConeGeometry(0.95, 3.6, 20, 1, true),
+                new THREE.MeshBasicMaterial({ color: 0xf5d0fe, transparent: true, opacity: 0.11, side: THREE.DoubleSide })
+            );
+            headBeam.rotation.x = Math.PI / 2 - 0.15;
+            headBeam.position.set(0, 0.9, -2.7);
+            bikeGroup.add(headBeam);
+
+            // --- REALISTIC SCULPTED BOY RIDER FIGURE ---
+            // Pelvis / Hips on Seat
+            const hips = new THREE.Mesh(new THREE.SphereGeometry(0.21, 18, 18), denimMat);
+            hips.scale.set(1.05, 0.8, 0.95);
+            hips.position.set(0, 1.18, 0.34);
+            bikeGroup.add(hips);
+
+            // Articulated Rider Legs (Thighs, Knees, Calves & Riding Boots on Footpegs)
+            [-0.21, 0.21].forEach(xSide => {
+                // Upper Thigh
+                const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.08, 0.48, 14), denimMat);
+                thigh.position.set(xSide, 1.05, 0.12);
+                thigh.rotation.x = Math.PI / 2 - 0.55;
+                thigh.rotation.z = xSide > 0 ? -0.12 : 0.12;
+                bikeGroup.add(thigh);
+
+                // Knee Joint
+                const knee = new THREE.Mesh(new THREE.SphereGeometry(0.082, 14, 14), denimMat);
+                knee.position.set(xSide * 1.1, 0.92, -0.1);
+                bikeGroup.add(knee);
+
+                // Lower Calf
+                const calf = new THREE.Mesh(new THREE.CylinderGeometry(0.078, 0.062, 0.44, 14), denimMat);
+                calf.position.set(xSide * 1.05, 0.72, 0.02);
+                calf.rotation.x = -0.45;
+                bikeGroup.add(calf);
+
+                // Riding Boot
+                const boot = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.1, 0.24), bootMat);
+                boot.position.set(xSide * 1.05, 0.52, 0.06);
+                bikeGroup.add(boot);
+            });
+
+            // Sculpted Torso with White Inner Tee, Collar & Fitted Biker Jacket
+            const torsoGroup = new THREE.Group();
+            torsoGroup.position.set(0, 1.54, 0.22);
+            torsoGroup.rotation.x = -0.28;
+
+            const chest = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.19, 0.62, 18), leatherJacketMat);
+            chest.scale.set(1.12, 1, 0.82);
+            chest.castShadow = true;
+            torsoGroup.add(chest);
+
+            // Inner White Shirt V-Neck & Silver Jacket Zipper
+            const innerShirt = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.16, 0.12, 0.58, 14),
+                new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 })
+            );
+            innerShirt.scale.set(0.7, 1.02, 0.86);
+            innerShirt.position.set(0, 0.02, -0.03);
+            torsoGroup.add(innerShirt);
+
+            // Broad Rounded Shoulders & Articulated Arms (Upper Arm, Elbow, Forearm, Hands on Grips)
+            [-0.27, 0.27].forEach(xSide => {
+                const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.105, 16, 16), leatherJacketMat);
+                shoulder.position.set(xSide, 0.24, 0);
+                torsoGroup.add(shoulder);
+            });
+            bikeGroup.add(torsoGroup);
+
+            [-0.29, 0.29].forEach(xSide => {
+                // Upper Arm
+                const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.065, 0.38, 14), leatherJacketMat);
+                upperArm.position.set(xSide, 1.62, -0.06);
+                upperArm.rotation.x = Math.PI / 2 - 0.52;
+                upperArm.rotation.z = xSide > 0 ? -0.15 : 0.15;
+                bikeGroup.add(upperArm);
+
+                // Elbow Joint
+                const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.065, 12, 12), leatherJacketMat);
+                elbow.position.set(xSide * 1.12, 1.50, -0.24);
+                bikeGroup.add(elbow);
+
+                // Forearm reaching Handlebar Grip
+                const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.05, 0.42, 14), leatherJacketMat);
+                forearm.position.set(xSide * 1.2, 1.44, -0.45);
+                forearm.rotation.x = Math.PI / 2 - 0.22;
+                forearm.rotation.z = xSide > 0 ? 0.12 : -0.12;
+                bikeGroup.add(forearm);
+
+                // Sculpted Hand holding Grip
+                const hand = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 12), skinMat);
+                hand.position.set(xSide * 1.28, 1.39, -0.66);
+                bikeGroup.add(hand);
+            });
+
+            // Neck
+            const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.085, 0.16, 14), skinMat);
+            neck.position.set(0, 1.90, 0.08);
+            bikeGroup.add(neck);
+
+            // Realistic Boy Head Group (Faces -Z forward along the bike with clear facial features, hair & open-visor helmet!)
+            riderHeadGroup = new THREE.Group();
+            riderHeadGroup.position.set(0, 2.08, 0.05);
+
+            // Sculpted Head & Jawline
+            const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.185, 24, 24), skinMat);
+            headMesh.scale.set(0.95, 1.08, 0.98);
+            riderHeadGroup.add(headMesh);
+
+            // Ears
+            [-0.175, 0.175].forEach(ex => {
+                const ear = new THREE.Mesh(new THREE.SphereGeometry(0.038, 12, 12), skinMat);
+                ear.scale.set(0.5, 1.1, 0.7);
+                ear.position.set(ex, 0, 0);
+                riderHeadGroup.add(ear);
+            });
+
+            // Expressive Eyes (White Sclera, Dark Iris, Eyebrows) facing -Z
+            const scleraMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const pupilMat = new THREE.MeshBasicMaterial({ color: 0x1e1b4b });
+            const hairDarkMat = new THREE.MeshStandardMaterial({ color: 0x140b29, roughness: 0.55 });
+
+            [-0.065, 0.065].forEach(ex => {
+                const sclera = new THREE.Mesh(new THREE.SphereGeometry(0.028, 12, 12), scleraMat);
+                sclera.scale.set(1.2, 0.85, 0.6);
+                sclera.position.set(ex, 0.03, -0.168);
+                riderHeadGroup.add(sclera);
+
+                const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.017, 10, 10), pupilMat);
+                pupil.position.set(ex, 0.03, -0.182);
+                riderHeadGroup.add(pupil);
+
+                // Eyebrow
+                const brow = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.012, 0.015), hairDarkMat);
+                brow.position.set(ex, 0.068, -0.172);
+                brow.rotation.z = ex > 0 ? -0.08 : 0.08;
+                riderHeadGroup.add(brow);
+            });
+
+            // Sculpted Nose & Gentle Smile on -Z face
+            const nose = new THREE.Mesh(new THREE.ConeGeometry(0.024, 0.065, 12), skinMat);
+            nose.rotation.x = -Math.PI / 2 + 0.25;
+            nose.position.set(0, 0.005, -0.192);
+            riderHeadGroup.add(nose);
+
+            const smile = new THREE.Mesh(
+                new THREE.TorusGeometry(0.036, 0.008, 8, 16, Math.PI),
+                new THREE.MeshBasicMaterial({ color: 0xbe185d })
+            );
+            smile.rotation.x = Math.PI;
+            smile.position.set(0, -0.045, -0.174);
+            riderHeadGroup.add(smile);
+
+            // Stylish Layered Hair & Open-Visor Sport Helmet Crown
+            const hairCrown = new THREE.Mesh(new THREE.SphereGeometry(0.196, 20, 20), hairDarkMat);
+            hairCrown.scale.set(1.02, 1.05, 1.04);
+            hairCrown.position.set(0, 0.045, 0.025);
+            riderHeadGroup.add(hairCrown);
+
+            // Front Stylish Hair Quiff
+            const hairQuiff = new THREE.Mesh(new THREE.SphereGeometry(0.09, 14, 14), hairDarkMat);
+            hairQuiff.scale.set(1.5, 0.65, 1.1);
+            hairQuiff.position.set(0, 0.145, -0.11);
+            hairQuiff.rotation.x = 0.3;
+            riderHeadGroup.add(hairQuiff);
+
+            // Sleek Open-Face Sport Helmet Shell with Raised Glowing Neon Visor
+            const helmetShell = new THREE.Mesh(
+                new THREE.SphereGeometry(0.215, 24, 24, 0, Math.PI * 2, 0, Math.PI * 0.62),
+                new THREE.MeshStandardMaterial({ color: 0x9333ea, metalness: 0.75, roughness: 0.2 })
+            );
+            helmetShell.rotation.x = -0.35;
+            helmetShell.position.set(0, 0.03, 0.02);
+            riderHeadGroup.add(helmetShell);
+
+            const raisedVisor = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.222, 0.222, 0.07, 20, 1, true, -Math.PI * 0.35, Math.PI * 0.7),
+                new THREE.MeshStandardMaterial({ color: 0xf472b6, transparent: true, opacity: 0.55, metalness: 0.9, roughness: 0.1 })
+            );
+            raisedVisor.rotation.y = Math.PI;
+            raisedVisor.position.set(0, 0.11, -0.02);
+            riderHeadGroup.add(raisedVisor);
+
+            bikeGroup.add(riderHeadGroup);
+
+            bikeGroup.position.set(-1.1, 0, 6.8);
+            scene.add(bikeGroup);
+        }
+
+        // Create Realistic Sculpted 3D Girl ("Kuttu") Crossing the Road — Proportional body, pleated dress, handbag, expressive eyes/lips/earrings & flowing hair
+        function createGirlCrossing() {
+            girlGroup = new THREE.Group();
+
+            const skinMat = new THREE.MeshStandardMaterial({ color: 0xfad2b8, roughness: 0.42 });
+            const dressBodiceMat = new THREE.MeshStandardMaterial({ color: 0xdb2777, roughness: 0.32, metalness: 0.15 });
+            const dressSkirtMat = new THREE.MeshStandardMaterial({ color: 0xec4899, roughness: 0.38, metalness: 0.1 });
+            const beltGoldMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.85, roughness: 0.2 });
+            const shoeMat = new THREE.MeshStandardMaterial({ color: 0x831843, roughness: 0.25, metalness: 0.4 });
+            const hairMat = new THREE.MeshStandardMaterial({ color: 0x160b29, roughness: 0.5 });
+
+            // --- ARTICULATED WALKING LEGS (Pivoting from the Hip at Y = 0.82 so walking motion looks completely natural) ---
+            function createRealisticLeg(xOffset) {
+                const legPivot = new THREE.Group();
+                legPivot.position.set(xOffset, 0.82, 0);
+
+                // Upper Thigh
+                const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.054, 0.38, 16), skinMat);
+                thigh.position.set(0, -0.19, 0);
+                legPivot.add(thigh);
+
+                // Knee
+                const knee = new THREE.Mesh(new THREE.SphereGeometry(0.053, 14, 14), skinMat);
+                knee.position.set(0, -0.38, 0);
+                legPivot.add(knee);
+
+                // Lower Calf & Ankle
+                const calf = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.036, 0.38, 16), skinMat);
+                calf.position.set(0, -0.57, 0);
+                legPivot.add(calf);
+
+                // Strappy Heel Shoe facing +Z forward
+                const shoeSole = new THREE.Mesh(new THREE.BoxGeometry(0.082, 0.04, 0.17), shoeMat);
+                shoeSole.position.set(0, -0.78, 0.035);
+                legPivot.add(shoeSole);
+
+                const ankleStrap = new THREE.Mesh(new THREE.TorusGeometry(0.039, 0.008, 8, 16), beltGoldMat);
+                ankleStrap.rotation.x = Math.PI / 2;
+                ankleStrap.position.set(0, -0.72, 0);
+                legPivot.add(ankleStrap);
+
+                return legPivot;
+            }
+
+            girlLeftLeg = createRealisticLeg(0.105);
+            girlGroup.add(girlLeftLeg);
+
+            girlRightLeg = createRealisticLeg(-0.105);
+            girlGroup.add(girlRightLeg);
+
+            // --- SCULPTED FLARED SKIRT, WAIST BELT & FITTED BODICE ---
+            const skirt = new THREE.Mesh(new THREE.CylinderGeometry(0.145, 0.38, 0.56, 28), dressSkirtMat);
+            skirt.position.set(0, 0.84, 0);
+            skirt.castShadow = true;
+            girlGroup.add(skirt);
+
+            // Subtle Skirt Pleat Accents
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const pleat = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.045, 0.54, 8), dressBodiceMat);
+                pleat.position.set(Math.cos(angle) * 0.24, 0.84, Math.sin(angle) * 0.24);
+                pleat.rotation.z = -Math.cos(angle) * 0.35;
+                pleat.rotation.x = Math.sin(angle) * 0.35;
+                girlGroup.add(pleat);
+            }
+
+            // Golden Waist Belt
+            const waistBelt = new THREE.Mesh(new THREE.TorusGeometry(0.148, 0.018, 12, 28), beltGoldMat);
+            waistBelt.rotation.x = Math.PI / 2;
+            waistBelt.position.set(0, 1.12, 0);
+            girlGroup.add(waistBelt);
+
+            // Fitted Bodice & Upper Torso
+            const bodice = new THREE.Mesh(new THREE.CylinderGeometry(0.175, 0.142, 0.38, 24), dressBodiceMat);
+            bodice.scale.set(1.06, 1, 0.82);
+            bodice.position.set(0, 1.30, 0);
+            bodice.castShadow = true;
+            girlGroup.add(bodice);
+
+            // Delicate Neck & Gold Heart Pendant Necklace
+            const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.06, 0.15, 16), skinMat);
+            neck.position.set(0, 1.54, 0);
+            girlGroup.add(neck);
+
+            const necklace = new THREE.Mesh(new THREE.TorusGeometry(0.068, 0.007, 8, 20), beltGoldMat);
+            necklace.rotation.x = Math.PI / 2 + 0.25;
+            necklace.position.set(0, 1.48, 0.01);
+            girlGroup.add(necklace);
+
+            // --- ARTICULATED SWINGING ARMS (Pivoting from the Shoulder at Y = 1.45 with Puff Sleeves, Forearms, Hands & Purse) ---
+            function createRealisticArm(xOffset, hasPurse) {
+                const armPivot = new THREE.Group();
+                armPivot.position.set(xOffset, 1.45, 0);
+
+                // Puff Sleeve Shoulder
+                const puffSleeve = new THREE.Mesh(new THREE.SphereGeometry(0.072, 16, 16), dressSkirtMat);
+                puffSleeve.scale.set(0.95, 1.15, 0.95);
+                puffSleeve.position.set(0, -0.02, 0);
+                armPivot.add(puffSleeve);
+
+                // Upper Arm
+                const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.044, 0.038, 0.26, 14), skinMat);
+                upperArm.position.set(0, -0.15, 0);
+                armPivot.add(upperArm);
+
+                // Forearm (Slightly bent forward in a natural feminine pose)
+                const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.037, 0.03, 0.25, 14), skinMat);
+                forearm.position.set(0, -0.37, 0.04);
+                forearm.rotation.x = -0.25;
+                armPivot.add(forearm);
+
+                // Gold Bracelet & Sculpted Hand
+                const bracelet = new THREE.Mesh(new THREE.TorusGeometry(0.034, 0.006, 8, 16), beltGoldMat);
+                bracelet.rotation.x = Math.PI / 2 - 0.25;
+                bracelet.position.set(0, -0.46, 0.06);
+                armPivot.add(bracelet);
+
+                const hand = new THREE.Mesh(new THREE.SphereGeometry(0.036, 12, 12), skinMat);
+                hand.scale.set(0.85, 1.15, 0.95);
+                hand.position.set(0, -0.50, 0.075);
+                armPivot.add(hand);
+
+                // Stylish Lavender Clutch / Handbag on her right arm
+                if (hasPurse) {
+                    const strap = new THREE.Mesh(new THREE.TorusGeometry(0.055, 0.006, 8, 16), beltGoldMat);
+                    strap.rotation.y = Math.PI / 2;
+                    strap.position.set(0, -0.48, 0.075);
+                    armPivot.add(strap);
+
+                    const bag = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.06, 0.14, 0.18),
+                        new THREE.MeshStandardMaterial({ color: 0xc084fc, roughness: 0.3, metalness: 0.3 })
+                    );
+                    bag.position.set(-0.02, -0.58, 0.075);
+                    armPivot.add(bag);
+                }
+
+                return armPivot;
+            }
+
+            girlLeftArm = createRealisticArm(0.22, false);
+            girlGroup.add(girlLeftArm);
+
+            girlRightArm = createRealisticArm(-0.22, true);
+            girlGroup.add(girlRightArm);
+
+            // --- REALISTIC GIRL HEAD GROUP (Faces +Z in local space with sculpted face, eyelashes, lips, earrings & flowing wavy hair) ---
+            girlHeadGroup = new THREE.Group();
+            girlHeadGroup.position.set(0, 1.71, 0);
+
+            // Sculpted Feminine Head
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.175, 28, 28), skinMat);
+            head.scale.set(0.94, 1.06, 0.96);
+            girlHeadGroup.add(head);
+
+            // Ears & Golden Drop Earrings
+            [-0.162, 0.162].forEach(ex => {
+                const ear = new THREE.Mesh(new THREE.SphereGeometry(0.032, 12, 12), skinMat);
+                ear.scale.set(0.5, 1.0, 0.7);
+                ear.position.set(ex, -0.01, 0);
+                girlHeadGroup.add(ear);
+
+                const earring = new THREE.Mesh(new THREE.SphereGeometry(0.018, 12, 12), beltGoldMat);
+                earring.position.set(ex * 1.03, -0.055, 0.01);
+                girlHeadGroup.add(earring);
+            });
+
+            // Expressive Eyes (White Sclera, Deep Brown/Violet Iris, Arched Eyebrows & Eyelashes) on +Z face
+            const scleraMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const irisMat = new THREE.MeshBasicMaterial({ color: 0x2e1065 });
+            const highlightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+            [-0.058, 0.058].forEach(ex => {
+                const sclera = new THREE.Mesh(new THREE.SphereGeometry(0.027, 14, 14), scleraMat);
+                sclera.scale.set(1.22, 0.92, 0.6);
+                sclera.position.set(ex, 0.025, 0.155);
+                girlHeadGroup.add(sclera);
+
+                const iris = new THREE.Mesh(new THREE.SphereGeometry(0.017, 12, 12), irisMat);
+                iris.position.set(ex, 0.025, 0.168);
+                girlHeadGroup.add(iris);
+
+                // Sparkling Eye Catchlight
+                const catchlight = new THREE.Mesh(new THREE.SphereGeometry(0.005, 8, 8), highlightMat);
+                catchlight.position.set(ex + 0.006, 0.032, 0.181);
+                girlHeadGroup.add(catchlight);
+
+                // Upper Eyelash Wing
+                const lash = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.007, 0.012), hairMat);
+                lash.position.set(ex * 1.05, 0.044, 0.164);
+                lash.rotation.z = ex > 0 ? 0.12 : -0.12;
+                girlHeadGroup.add(lash);
+
+                // Arched Eyebrow
+                const brow = new THREE.Mesh(new THREE.BoxGeometry(0.046, 0.009, 0.012), hairMat);
+                brow.position.set(ex, 0.064, 0.16);
+                brow.rotation.z = ex > 0 ? -0.1 : 0.1;
+                girlHeadGroup.add(brow);
+            });
+
+            // Delicate Nose, Rosy Blush & Smiling Rose Lips on +Z face
+            const nose = new THREE.Mesh(new THREE.ConeGeometry(0.019, 0.052, 12), skinMat);
+            nose.rotation.x = Math.PI / 2 - 0.28;
+            nose.position.set(0, 0.0, 0.176);
+            girlHeadGroup.add(nose);
+
+            const blushMat = new THREE.MeshBasicMaterial({ color: 0xf472b6, transparent: true, opacity: 0.55 });
+            [-0.095, 0.095].forEach(bx => {
+                const blush = new THREE.Mesh(new THREE.SphereGeometry(0.028, 12, 12), blushMat);
+                blush.scale.set(1.2, 0.75, 0.5);
+                blush.position.set(bx, -0.02, 0.152);
+                girlHeadGroup.add(blush);
+            });
+
+            const lips = new THREE.Mesh(
+                new THREE.TorusGeometry(0.03, 0.0085, 10, 18, Math.PI),
+                new THREE.MeshBasicMaterial({ color: 0xe11d48 })
+            );
+            lips.rotation.x = Math.PI;
+            lips.position.set(0, -0.042, 0.162);
+            girlHeadGroup.add(lips);
+
+            // Voluminous Parted Hairstyle, Side Locks & Long Flowing Wavy Back Hair (-Z)
+            const hairCrown = new THREE.Mesh(new THREE.SphereGeometry(0.186, 24, 24), hairMat);
+            hairCrown.scale.set(1.04, 1.06, 1.05);
+            hairCrown.position.set(0, 0.038, -0.032);
+            girlHeadGroup.add(hairCrown);
+
+            // Soft Side Bangs framing her temples without blocking her face
+            [-0.125, 0.125].forEach(hx => {
+                const sideLock = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.018, 0.28, 12), hairMat);
+                sideLock.position.set(hx, -0.05, 0.04);
+                sideLock.rotation.z = hx > 0 ? -0.15 : 0.15;
+                girlHeadGroup.add(sideLock);
+            });
+
+            // Long Wavy Back Hair cascading down her back (-Z)
+            const hairWaveUpper = new THREE.Mesh(new THREE.SphereGeometry(0.17, 20, 20), hairMat);
+            hairWaveUpper.scale.set(1.08, 1.45, 0.75);
+            hairWaveUpper.position.set(0, -0.18, -0.13);
+            girlHeadGroup.add(hairWaveUpper);
+
+            const hairWaveLower = new THREE.Mesh(new THREE.ConeGeometry(0.19, 0.48, 20), hairMat);
+            hairWaveLower.rotation.z = Math.PI;
+            hairWaveLower.scale.set(1.1, 1, 0.65);
+            hairWaveLower.position.set(0, -0.38, -0.14);
+            girlHeadGroup.add(hairWaveLower);
+
+            // Delicate Floral Hair Clip
+            const hairFlower = new THREE.Mesh(new THREE.SphereGeometry(0.032, 12, 12), dressSkirtMat);
+            hairFlower.position.set(-0.14, 0.09, 0.05);
+            girlHeadGroup.add(hairFlower);
+
+            girlGroup.add(girlHeadGroup);
+
+            // Magical Soft Pink Aura Ring under her feet
+            const auraGeo = new THREE.RingGeometry(0.45, 0.68, 32);
+            const auraMat = new THREE.MeshBasicMaterial({ color: 0xf472b6, side: THREE.DoubleSide, transparent: true, opacity: 0.75 });
+            const aura = new THREE.Mesh(auraGeo, auraMat);
+            aura.rotation.x = -Math.PI / 2;
+            aura.position.y = 0.04;
+            girlGroup.add(aura);
+
+            // Face +X (Math.PI / 2) so she faces the exact direction she walks across the road
+            girlGroup.rotation.y = Math.PI / 2;
+            girlGroup.position.set(-3.6, 0, -0.2);
+            scene.add(girlGroup);
+        }
+
+        // Helper to build a detailed 2-tier 3D Birthday Cake with flickering candles
+        function buildCakeMesh(baseColor, icingColor, candleCount) {
+            const group = new THREE.Group();
+
+            // Glowing Pedestal Plate
+            const plate = new THREE.Mesh(
+                new THREE.CylinderGeometry(2.2, 2.4, 0.2, 32),
+                new THREE.MeshStandardMaterial({ color: 0xf3e8ff, metalness: 0.5, roughness: 0.2 })
+            );
+            plate.position.y = 0.1;
+            group.add(plate);
+
+            // Bottom Tier
+            const tier1 = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.75, 1.75, 1.1, 32),
+                new THREE.MeshStandardMaterial({ color: baseColor, roughness: 0.4 })
+            );
+            tier1.position.y = 0.75;
+            group.add(tier1);
+
+            // Top Tier
+            const tier2 = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.2, 1.2, 0.9, 32),
+                new THREE.MeshStandardMaterial({ color: icingColor, roughness: 0.35 })
+            );
+            tier2.position.y = 1.75;
+            group.add(tier2);
+
+            // Frosting Pearls around tiers
+            const pearlMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+            for (let i = 0; i < 16; i++) {
+                const angle = (i / 16) * Math.PI * 2;
+                const pearl = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 12), pearlMat);
+                pearl.position.set(Math.cos(angle) * 1.72, 1.28, Math.sin(angle) * 1.72);
+                group.add(pearl);
+            }
+
+            // Candles on top tier
+            const candleMat = new THREE.MeshStandardMaterial({ color: 0xfef08a });
+            const flameMat = new THREE.MeshBasicMaterial({ color: 0xf97316 });
+
+            for (let i = 0; i < candleCount; i++) {
+                const angle = (i / candleCount) * Math.PI * 2;
+                const radius = candleCount === 1 ? 0 : 0.65;
+                const cx = Math.cos(angle) * radius;
+                const cz = Math.sin(angle) * radius;
+
+                const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.55, 12), candleMat);
+                candle.position.set(cx, 2.45, cz);
+                group.add(candle);
+
+                const flame = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.26, 12), flameMat);
+                flame.position.set(cx, 2.82, cz);
+                flameMeshes.push(flame);
+                group.add(flame);
+            }
+
+            return group;
+        }
+
+        function createBirthdayCakes() {
+            // Her Birthday Cake (June 4) - Pink & Lavender
+            herCakeGroup = buildCakeMesh(0xdb2777, 0xf472b6, 6);
+            herCakeGroup.position.set(0, -10, 0);
+            scene.add(herCakeGroup);
+
+            // My Birthday Cake (Oct 11) - Royal Purple & Gold
+            myCakeGroup = buildCakeMesh(0x7e22ce, 0xc084fc, 8);
+            myCakeGroup.position.set(0, -10, 0);
+            scene.add(myCakeGroup);
+        }
+
+        // Create 3D Extruded Heart for Stage 4, 5, 6
+        function create3DFinaleHeart() {
+            heart3DGroup = new THREE.Group();
+
+            const x = 0, y = 0;
+            const heartShape = new THREE.Shape();
+            heartShape.moveTo(x + 0.5, y + 0.5);
+            heartShape.bezierCurveTo(x + 0.5, y + 0.5, x + 0.4, y, x, y);
+            heartShape.bezierCurveTo(x - 0.6, y, x - 0.6, y + 0.7, x - 0.6, y + 0.7);
+            heartShape.bezierCurveTo(x - 0.6, y + 1.1, x - 0.3, y + 1.54, x + 0.5, y + 1.9);
+            heartShape.bezierCurveTo(x + 1.2, y + 1.54, x + 1.6, y + 1.1, x + 1.6, y + 0.7);
+            heartShape.bezierCurveTo(x + 1.6, y + 0.7, x + 1.6, y, x + 1.0, y);
+            heartShape.bezierCurveTo(x + 0.7, y, x + 0.5, y + 0.5, x + 0.5, y + 0.5);
+
+            const extrudeSettings = {
+                depth: 0.45,
+                bevelEnabled: true,
+                bevelSegments: 5,
+                steps: 2,
+                bevelSize: 0.15,
+                bevelThickness: 0.15
+            };
+
+            const geo = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+            geo.center();
+
+            const mat = new THREE.MeshStandardMaterial({
+                color: 0xd946ef,
+                emissive: 0x7e22ce,
+                emissiveIntensity: 0.45,
+                metalness: 0.4,
+                roughness: 0.2
+            });
+
+            const heartMesh = new THREE.Mesh(geo, mat);
+            heartMesh.rotation.z = Math.PI; // Upright heart
+            heartMesh.scale.set(1.35, 1.35, 1.35);
+            heart3DGroup.add(heartMesh);
+
+            heart3DGroup.position.set(0, -12, 0);
+            scene.add(heart3DGroup);
+        }
+
+        /**************************************************************
+         * 4. STAGE TRANSITIONS & UI UPDATES
+         **************************************************************/
+        function showModalSmoothly(modalEl) {
+            modalEl.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    modalEl.classList.remove('modal-enter');
+                    modalEl.classList.add('modal-active');
+                });
+            });
+        }
+
+        function hideAllModals() {
+            ['calculation-modal', 'letter-modal', 'heart-modal'].forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove('modal-active');
+                el.classList.add('modal-enter', 'hidden');
+            });
+        }
+
+        function updateUIForStage() {
+            const st = STAGES[currentStage];
+            const footerWrap = document.getElementById('footer-text-wrap');
+            footerWrap.classList.add('switching');
+
+            setTimeout(() => {
+                document.getElementById('chapter-subtitle').textContent = st.subtitle;
+                document.getElementById('stage-badge').textContent = st.badge;
+                document.getElementById('stage-title').textContent = st.title;
+                document.getElementById('stage-description').textContent = st.description;
+                document.getElementById('next-btn-text').textContent = st.nextText;
+                document.getElementById('prev-btn').disabled = (currentStage === 0);
+                footerWrap.classList.remove('switching');
+            }, 180);
+
+            // Update Sky Banner Text
+            document.getElementById('sky-date-title').textContent = st.skyTitle;
+            document.getElementById('sky-date-desc').textContent = st.skyDesc;
+
+            // Update Top Step Dots
+            const dots = document.getElementById('step-dots').children;
+            for (let i = 0; i < dots.length; i++) {
+                if (i === currentStage) {
+                    dots[i].className = "w-6 sm:w-8 h-1.5 sm:h-2 rounded-full transition-all duration-500 bg-pink-500 shadow shadow-pink-500/50";
+                } else if (i < currentStage) {
+                    dots[i].className = "w-2 sm:w-3 h-1.5 sm:h-2 rounded-full transition-all duration-500 bg-purple-400";
+                } else {
+                    dots[i].className = "w-2 sm:w-3 h-1.5 sm:h-2 rounded-full transition-all duration-500 bg-purple-800";
+                }
+            }
+
+            const skyBanner = document.getElementById('sky-date-banner');
+            const calcModal = document.getElementById('calculation-modal');
+            const letterModal = document.getElementById('letter-modal');
+            const heartModal = document.getElementById('heart-modal');
+            const stageDesc = document.getElementById('stage-description');
+
+            hideAllModals();
+
+            // On mobile, hide the extra footer description when a large center modal is open so nothing ever feels cramped
+            if (currentStage >= 3) {
+                stageDesc.classList.add('hidden', 'sm:block');
+            } else {
+                stageDesc.classList.remove('hidden');
+            }
+
+            // Reset stage timer & orbit
+            stageTimer = 0;
+            orbitOffset = { x: 0, y: 0 };
+            const mobZ = getMobileZOffset();
+
+            if (currentStage === 0) {
+                // Stage 0: Bike & Girl Crossing -> Angled 3/4 cinematic camera so both faces & paths are clearly seen
+                skyBanner.classList.add('opacity-0', '-translate-y-4');
+                bikeGroup.position.set(-1.1, 0, 6.8);
+                bikeGroup.rotation.y = 0;
+                if (riderHeadGroup) riderHeadGroup.rotation.set(0, 0, 0);
+                girlGroup.position.set(-3.6, 0, -0.2);
+                girlGroup.rotation.y = Math.PI / 2; // Facing +X along the crosswalk
+                if (girlHeadGroup) girlHeadGroup.rotation.set(0, 0, 0);
+                camPosTarget.set(2.2, 2.6, 9.2 + mobZ);
+                camLookTarget.set(-0.2, 1.35, 1.0);
+                playChime(["E5", "G5", "B5", "E6"]);
+            } 
+            else if (currentStage === 1) {
+                // Stage 1: Her Birthday Cake (June 4) — Look slightly higher so the cake sits cleanly below the top date banner
+                skyBanner.classList.remove('opacity-0', '-translate-y-4');
+                camPosTarget.set(0, 3.0, 7.2 + mobZ * 0.65);
+                camLookTarget.set(0, 2.25, 0);
+                playChime(["F5", "A5", "C6", "F6"]);
+            } 
+            else if (currentStage === 2) {
+                // Stage 2: My Birthday Cake (Oct 11) — Look slightly higher so the cake sits cleanly below the top date banner
+                skyBanner.classList.remove('opacity-0', '-translate-y-4');
+                camPosTarget.set(0, 3.0, 7.2 + mobZ * 0.65);
+                camLookTarget.set(0, 2.25, 0);
+                playChime(["G5", "B5", "D6", "G6"]);
+            } 
+            else if (currentStage === 3) {
+                // Stage 3: Calculation (6x4=24, 11x10=110, 134, June 5 -> Nov 16)
+                skyBanner.classList.add('opacity-0', '-translate-y-4');
+                showModalSmoothly(calcModal);
+                camPosTarget.set(0, 5.5, 9.5 + mobZ * 0.5);
+                camLookTarget.set(0, 4.5, 0);
+                triggerCalculationSteps();
+                playChime(["A5", "C#6", "E6", "A6"]);
+            } 
+            else if (currentStage === 4) {
+                // Stage 4: Love Letter for My Kuttu
+                skyBanner.classList.add('opacity-0', '-translate-y-4');
+                showModalSmoothly(letterModal);
+                camPosTarget.set(0, 5.5, 8.5 + mobZ * 0.5);
+                camLookTarget.set(0, 4.5, 0);
+                playChime(["D5", "F#5", "A5", "D6"]);
+            } 
+            else if (currentStage === 5) {
+                // Stage 5: Interactive Heart Fill Finale
+                skyBanner.classList.add('opacity-0', '-translate-y-4');
+                showModalSmoothly(heartModal);
+                camPosTarget.set(0, 4.5, 6.5 + mobZ * 0.5);
+                camLookTarget.set(0, 4.2, 0);
+                playChime(["E5", "G#5", "B5", "E6"]);
+            }
+        }
+
+        function triggerCalculationSteps() {
+            const ids = ['calc-1', 'calc-2', 'calc-3', 'calc-4'];
+            ids.forEach(id => document.getElementById(id).classList.remove('visible'));
+            ids.forEach((id, index) => {
+                setTimeout(() => {
+                    if (currentStage === 3) {
+                        document.getElementById(id).classList.add('visible');
+                        playChime(["C5", "G5"]);
+                    }
+                }, 250 + index * 550);
+            });
+        }
+
+        function nextStage() {
+            if (currentStage < STAGES.length - 1) {
+                currentStage++;
+            } else {
+                currentStage = 0; // Replay from beginning
+            }
+            updateUIForStage();
+        }
+
+        function prevStage() {
+            if (currentStage > 0) {
+                currentStage--;
+                updateUIForStage();
+            }
+        }
+
+        function goToStage(index) {
+            currentStage = index;
+            updateUIForStage();
+        }
+
+        /**************************************************************
+         * 5. INTERACTIVE HEART FILL LOGIC (STAGE 6)
+         **************************************************************/
+        function fillHeartStep(event) {
+            if (heartFillProgress < 100) {
+                heartFillProgress = Math.min(100, heartFillProgress + 20);
+            }
+
+            // Update SVG Fill Rect Y position (90 is empty, 0 is full)
+            const rect = document.getElementById('heart-fill-rect');
+            const newY = 90 - (heartFillProgress / 100) * 90;
+            rect.setAttribute('y', newY);
+
+            document.getElementById('heart-pct-text').textContent = heartFillProgress + '%';
+
+            // Play ascending romantic note
+            const notes = ["C5", "D5", "E5", "G5", "A5", "C6"];
+            const noteIdx = Math.min(notes.length - 1, Math.floor(heartFillProgress / 20));
+            playChime([notes[noteIdx], "E6"]);
+
+            // Spawn floating purple/pink hearts where user tapped
+            spawnFloatingHeart(event.clientX || window.innerWidth / 2, event.clientY || window.innerHeight / 2);
+
+            // Pulse 3D heart scale
+            if (heart3DGroup) {
+                heart3DGroup.scale.set(1.35, 1.35, 1.35);
+            }
+
+            if (heartFillProgress === 100) {
+                document.getElementById('heart-complete-banner').classList.remove('hidden');
+                document.getElementById('heart-instruction').textContent = "Our heart is overflowing! Wish you the special day, my Kuttu!";
+                // Burst multiple floating hearts
+                for (let i = 0; i < 12; i++) {
+                    setTimeout(() => {
+                        spawnFloatingHeart(
+                            window.innerWidth * (0.25 + Math.random() * 0.5),
+                            window.innerHeight * (0.4 + Math.random() * 0.3)
+                        );
+                    }, i * 100);
+                }
+            }
+        }
+
+        function spawnFloatingHeart(x, y) {
+            const el = document.createElement('div');
+            el.className = 'floating-heart text-2xl sm:text-3xl';
+            const emojis = ['💜', '💖', '✨', '🌸', '💝'];
+            el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            el.style.left = (x - 15 + (Math.random() - 0.5) * 40) + 'px';
+            el.style.top = (y - 15) + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
+
+        /**************************************************************
+         * 6. MAIN 3D ANIMATION LOOP
+         **************************************************************/
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = Math.min(clock.getDelta(), 0.1);
+            const elapsed = clock.getElapsedTime();
+            stageTimer += delta;
+
+            // Gentle Starry Sky Rotation
+            if (starField) {
+                starField.rotation.y = elapsed * 0.015;
+            }
+
+            // Flicker Candle Flames on Both Birthday Cakes
+            flameMeshes.forEach((flame, idx) => {
+                const s = 0.88 + Math.sin(elapsed * 12 + idx * 1.7) * 0.18;
+                flame.scale.set(s, 0.9 + Math.cos(elapsed * 15 + idx) * 0.22, s);
+            });
+
+            // STAGE 0: Bike rides to crosswalk, Girl crosses road, they face each other, then Camera pans up to show JULY 5
+            if (currentStage === 0) {
+                roadGroup.visible = true;
+                bikeGroup.visible = true;
+                girlGroup.visible = true;
+
+                // Bike moves smoothly from Z=6.8 and decelerates gently before crosswalk at Z=2.0
+                if (bikeGroup.position.z > 2.0) {
+                    const distRemaining = bikeGroup.position.z - 2.0;
+                    const speed = Math.max(0.45, distRemaining * 0.95);
+                    bikeGroup.position.z -= delta * speed;
+                    // Spin motorcycle wheels realistically
+                    if (frontWheelMesh && backWheelMesh) {
+                        frontWheelMesh.rotation.x -= delta * speed * 2.2;
+                        backWheelMesh.rotation.x -= delta * speed * 2.2;
+                    }
+                }
+
+                // Girl walks across the zebra crossing from left (-3.6) to right (+1.4) facing +X
+                if (girlGroup.position.x < 1.4) {
+                    girlGroup.position.x += delta * 1.35;
+                    // Face her walking direction (+X is rotation.y = Math.PI / 2)
+                    girlGroup.rotation.y = THREE.MathUtils.damp(girlGroup.rotation.y, Math.PI / 2, 6, delta);
+                    // Gentle walking bob & forward/backward limb swing (rotation.x in local space!)
+                    girlGroup.position.y = Math.abs(Math.sin(elapsed * 7.5)) * 0.08;
+                    if (girlLeftLeg && girlRightLeg) {
+                        girlLeftLeg.rotation.x = Math.sin(elapsed * 7.5) * 0.48;
+                        girlRightLeg.rotation.x = -Math.sin(elapsed * 7.5) * 0.48;
+                        girlLeftArm.rotation.x = -Math.sin(elapsed * 7.5) * 0.35;
+                        girlRightArm.rotation.x = Math.sin(elapsed * 7.5) * 0.35;
+                    }
+                    // As she passes in front of the bike, her head turns slightly toward the rider (+Z)
+                    if (girlHeadGroup && girlGroup.position.x > -1.5) {
+                        girlHeadGroup.rotation.y = THREE.MathUtils.damp(girlHeadGroup.rotation.y, -0.55, 4, delta);
+                    }
+                    // Rider turns his helmeted head to follow her across the road
+                    if (riderHeadGroup) {
+                        const lookAngle = THREE.MathUtils.clamp(-(girlGroup.position.x - bikeGroup.position.x) * 0.32, -0.65, 0.45);
+                        riderHeadGroup.rotation.y = THREE.MathUtils.damp(riderHeadGroup.rotation.y, lookAngle, 5, delta);
+                    }
+                } else {
+                    // When she finishes crossing, she pauses and turns her body to face the rider on the bike!
+                    girlGroup.position.y = THREE.MathUtils.damp(girlGroup.position.y, 0, 6, delta);
+                    girlGroup.rotation.y = THREE.MathUtils.damp(girlGroup.rotation.y, -0.65, 4.5, delta);
+                    if (girlHeadGroup) {
+                        girlHeadGroup.rotation.y = THREE.MathUtils.damp(girlHeadGroup.rotation.y, 0, 5, delta);
+                        // Both look up slightly toward the starry July 5 sky together
+                        if (stageTimer > 3.1) {
+                            girlHeadGroup.rotation.x = THREE.MathUtils.damp(girlHeadGroup.rotation.x, -0.35, 3, delta);
+                        }
+                    }
+                    if (riderHeadGroup && stageTimer > 3.1) {
+                        riderHeadGroup.rotation.x = THREE.MathUtils.damp(riderHeadGroup.rotation.x, 0.38, 3, delta);
+                    }
+                    if (girlLeftLeg && girlRightLeg) {
+                        girlLeftLeg.rotation.x = THREE.MathUtils.damp(girlLeftLeg.rotation.x, 0, 8, delta);
+                        girlRightLeg.rotation.x = THREE.MathUtils.damp(girlRightLeg.rotation.x, 0, 8, delta);
+                        girlLeftArm.rotation.x = THREE.MathUtils.damp(girlLeftArm.rotation.x, 0, 8, delta);
+                        girlRightArm.rotation.x = THREE.MathUtils.damp(girlRightArm.rotation.x, 0, 8, delta);
+                    }
+                }
+
+                // After 3.2 seconds of watching her cross and lock eyes, pan camera UP to the starry sky & reveal JULY 5
+                if (stageTimer > 3.2) {
+                    const mobZ = getMobileZOffset();
+                    camPosTarget.set(0, 2.1, 7.5 + mobZ * 0.5);
+                    camLookTarget.set(0, 11.2, -16); // Look up into the starry sky & moon
+                    const skyBanner = document.getElementById('sky-date-banner');
+                    if (skyBanner.classList.contains('opacity-0')) {
+                        skyBanner.classList.remove('opacity-0', '-translate-y-4');
+                    }
+                }
+            } else {
+                // Dim street elements in later stages so cakes & 3D heart shine
+                roadGroup.visible = (currentStage <= 2);
+                bikeGroup.visible = false;
+                girlGroup.visible = false;
+            }
+
+            // STAGE 1: Her Birthday Cake (June 4)
+            if (currentStage === 1) {
+                herCakeGroup.position.y = THREE.MathUtils.damp(herCakeGroup.position.y, 0.3, 4.5, delta);
+                herCakeGroup.rotation.y = elapsed * 0.65;
+            } else {
+                herCakeGroup.position.y = THREE.MathUtils.damp(herCakeGroup.position.y, -10, 6, delta);
+            }
+
+            // STAGE 2: My Birthday Cake (October 11)
+            if (currentStage === 2) {
+                myCakeGroup.position.y = THREE.MathUtils.damp(myCakeGroup.position.y, 0.3, 4.5, delta);
+                myCakeGroup.rotation.y = elapsed * 0.65;
+            } else {
+                myCakeGroup.position.y = THREE.MathUtils.damp(myCakeGroup.position.y, -10, 6, delta);
+            }
+
+            // STAGES 3, 4, 5: 3D Extruded Purple/Pink Heart floating in the sky
+            if (currentStage >= 3) {
+                const targetY = currentStage === 5 ? 4.2 : 5.2;
+                heart3DGroup.position.y = THREE.MathUtils.damp(heart3DGroup.position.y, targetY + Math.sin(elapsed * 2) * 0.25, 4.5, delta);
+                heart3DGroup.rotation.y = elapsed * 0.8 + (heartFillProgress * 0.03);
+                const targetScale = 1 + (heartFillProgress / 100) * 0.45;
+                heart3DGroup.scale.x = THREE.MathUtils.damp(heart3DGroup.scale.x, targetScale, 5, delta);
+                heart3DGroup.scale.y = THREE.MathUtils.damp(heart3DGroup.scale.y, targetScale, 5, delta);
+                heart3DGroup.scale.z = THREE.MathUtils.damp(heart3DGroup.scale.z, targetScale, 5, delta);
+            } else {
+                heart3DGroup.position.y = THREE.MathUtils.damp(heart3DGroup.position.y, -12, 6, delta);
+            }
+
+            // Frame-rate independent Cinematic Camera Damping + Subtle Handheld Breathing + User Orbit
+            const breathX = Math.sin(elapsed * 0.9) * 0.12;
+            const breathY = Math.cos(elapsed * 1.1) * 0.08;
+            const desiredPos = new THREE.Vector3(
+                camPosTarget.x + orbitOffset.x + breathX,
+                camPosTarget.y + orbitOffset.y + breathY,
+                camPosTarget.z
+            );
+
+            camera.position.x = THREE.MathUtils.damp(camera.position.x, desiredPos.x, 3.2, delta);
+            camera.position.y = THREE.MathUtils.damp(camera.position.y, desiredPos.y, 3.2, delta);
+            camera.position.z = THREE.MathUtils.damp(camera.position.z, desiredPos.z, 3.2, delta);
+
+            currentLook.x = THREE.MathUtils.damp(currentLook.x, camLookTarget.x, 3.5, delta);
+            currentLook.y = THREE.MathUtils.damp(currentLook.y, camLookTarget.y, 3.5, delta);
+            currentLook.z = THREE.MathUtils.damp(currentLook.z, camLookTarget.z, 3.5, delta);
+            camera.lookAt(currentLook);
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            // Dynamically adjust Z-distance for portrait vs landscape mobile changes
+            const mobZ = getMobileZOffset();
+            if (currentStage === 0 && stageTimer <= 3.2) {
+                camPosTarget.z = 9.2 + mobZ;
+            }
+        }
+
+        // Start 3D World on Window Load
+        window.onload = function () {
+            initThreeScene();
+            updateUIForStage();
+            animate();
+        };
+    </script>
+</body>
+</html>
