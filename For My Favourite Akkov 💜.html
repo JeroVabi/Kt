@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#10091f">
+<title>For My Favourite Akkov 💜</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Great+Vibes&display=swap');
+:root{--bg:#10091f;--violet:#9b78ff;--lav:#d8caff;--gold:#f3d59a;--muted:#c2b7d8}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:#fff;font-family:'DM Sans',sans-serif;overflow-x:hidden}
+body{background:radial-gradient(ellipse at 50% 20%,#34205b 0%,#1a1030 38%,#10091f 78%);min-height:100vh}
+#sky{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.star{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:.4;animation:twinkle 3s infinite ease-in-out}
+@keyframes twinkle{0%,100%{opacity:.18;transform:scale(.7)}50%{opacity:1;transform:scale(1.7)}}
+.orb{display:none;position:fixed;width:300px;height:300px;border-radius:50%;filter:blur(80px);opacity:.18;pointer-events:none;z-index:0}
+.orb.one{background:#8c55ff;top:8%;left:-150px}.orb.two{background:#bd6dff;right:-170px;bottom:4%}
+main{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:26px 18px 118px}
+.topline{font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;color:#c7b3ff;margin-bottom:18px;text-align:center}
+.progress{width:min(440px,88vw);height:3px;background:#ffffff18;border-radius:9px;margin:0 auto 28px;overflow:hidden}
+.progress span{display:block;height:100%;width:12.5%;background:linear-gradient(90deg,#8d65ed,#f3d59a);transition:width .5s}
+.scene{display:none;width:min(720px,100%);text-align:center;animation:enter .8s cubic-bezier(.2,.8,.2,1)}
+.scene.active{display:block}
+@keyframes enter{from{opacity:0;transform:translateY(24px) scale(.98);filter:blur(5px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+.kicker{color:var(--gold);letter-spacing:.22em;text-transform:uppercase;font-size:.7rem;margin-bottom:14px}
+h1,h2{font-family:'Cormorant Garamond',serif;font-weight:500;line-height:1.02;margin:0 auto 18px}
+h1{font-size:clamp(3.3rem,10vw,6.5rem);color:#f4eaff;text-shadow:0 0 35px #a77bff55}
+h2{font-size:clamp(2.5rem,7vw,4.3rem);color:#f4eaff}
+.script{font-family:'Great Vibes',cursive;color:#d8c4ff;font-size:clamp(2.4rem,7vw,4.2rem);line-height:1.1}
+p{font-size:clamp(.98rem,2.6vw,1.12rem);line-height:1.85;color:#e1d9ef;max-width:590px;margin:12px auto}
+.small{font-size:.86rem;color:#b8a9d2}
+.glow{color:var(--gold);text-shadow:0 0 18px #eacb8c66}
+.panel{margin:26px auto 0;padding:25px 24px;max-width:570px;border:1px solid #d7c4ff30;border-radius:24px;background:linear-gradient(145deg,#ffffff12,#ffffff05);box-shadow:0 20px 70px #0005,inset 0 1px #ffffff12;backdrop-filter:blur(12px)}
+button{font:inherit;cursor:pointer;border:0}
+.primary{margin-top:24px;padding:14px 25px;border-radius:999px;color:#211333;background:linear-gradient(110deg,#e6d7ff,#b99aff 55%,#f3d59a);font-weight:700;box-shadow:0 8px 30px #a47bff44;transition:.25s}
+.primary:hover{transform:translateY(-3px);box-shadow:0 12px 35px #a47bff77}
+.secondary{padding:10px 16px;border:1px solid #d9caff44;border-radius:999px;background:#ffffff0c;color:#eee7ff}
+.secondary:hover{background:#ffffff1b}
+.controls{position:fixed;z-index:5;bottom:0;left:0;right:0;padding:13px 14px calc(13px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:9px;flex-wrap:wrap;background:linear-gradient(0deg,#10091ff5,#10091fce 70%,transparent);backdrop-filter:blur(8px)}
+.controls button{font-size:.82rem}
+.controls .next{background:#d9c8ff;color:#211333;border:0;font-weight:700}
+.symbol{font-size:clamp(3rem,10vw,5.5rem);margin:12px 0;filter:drop-shadow(0 0 22px #c8aaff88);animation:float 4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-12px) rotate(3deg)}}
+.cake{font-size:5rem;position:relative;display:inline-block;filter:drop-shadow(0 0 24px #ba8dff88)}
+.flame{position:absolute;top:-4px;left:48%;width:12px;height:19px;background:radial-gradient(ellipse at 50% 70%,#fff8c8 0 20%,#ffc45d 45%,#ff7b48 75%,transparent 76%);border-radius:50%;animation:flicker .18s infinite alternate;transform-origin:bottom}
+@keyframes flicker{to{transform:rotate(7deg) scale(.85)}}
+.reasons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:22px auto 0;max-width:590px}
+.reason{padding:15px 12px;border:1px solid #d9caff2b;border-radius:16px;background:#ffffff0a;color:#eee5ff;min-height:76px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:.92rem}
+.reason b{color:#f4d99f;font-weight:600}
+.letter{font-family:'Cormorant Garamond',serif;font-size:1.25rem;line-height:1.75;color:#f4eaff;text-align:left}
+.letter .sign{font-family:'Great Vibes',cursive;font-size:2.3rem;color:#e1caff;text-align:right;margin-top:12px}
+.lantern{display:inline-block;font-size:4.5rem;filter:drop-shadow(0 0 20px #f3d59a);animation:rise 5s ease-in-out infinite}
+@keyframes rise{0%,100%{transform:translateY(8px)}50%{transform:translateY(-22px)}}
+.stage{width:min(440px,100%);margin:0 auto}main{min-height:100dvh}button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}.secret{display:none;margin:20px auto 0;max-width:520px}
+.secret.show{display:block;animation:enter .8s}
+.footnote{position:fixed;top:14px;right:15px;z-index:4;color:#bca9e2;font-size:.72rem}
+.heart{position:fixed;pointer-events:none;z-index:3;animation:heartfly 2.8s ease-out forwards;font-size:20px}
+@keyframes heartfly{to{transform:translate(var(--dx),-110vh) rotate(30deg);opacity:0}}
+@media(max-width:480px){main{padding-top:54px}.panel{padding:20px 17px}.reasons{gap:8px}.reason{font-size:.82rem;min-height:70px}.controls{gap:6px}.controls button{padding:8px 11px;font-size:.76rem;min-height:40px}main{padding-bottom:140px}.kicker{font-size:.64rem}.topline{margin-bottom:12px}.progress{margin-bottom:18px}.primary{width:100%;max-width:340px}.stage{width:100%}.letter{font-size:1.12rem}.panel p{margin:10px auto}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div id="sky"></div><div class="orb one"></div><div class="orb two"></div>
+<div class="footnote">A tiny universe made for you ✦</div>
+<main>
+  <div class="topline" id="sceneCount">A little journey · 01 / 08</div>
+  <div class="progress"><span id="progress"></span></div>
+
+  <section class="scene active" data-scene="0">
+    <div class="kicker">psst... someone special</div>
+    <div class="symbol">✉️</div>
+    <h1>Akkov...</h1>
+    <p>Some people enter our lives as family, then quietly become family.</p>
+    <div class="panel"><p class="script">I made a little something for you.</p><p class="small">No big speech. Okay, maybe a tiny one. 😌</p></div>
+    <button class="primary" onclick="next()">Open your surprise ✨</button>
+  </section>
+
+  <section class="scene" data-scene="1">
+    <div class="kicker">today, the stars celebrate you</div>
+    <div class="stage" id="cakeStage"><div class="cake"><span class="flame"></span>🎂</div></div><p class="small" id="blowNote" style="margin:0 auto 4px">Make a wish first... then blow! (drag the cake to spin it) ✨</p><button class="primary" id="blowBtn" style="margin:6px 0">Blow the candles 🌬️</button><div><button class="secondary" id="micBtn" style="margin:6px 0 12px">or blow into your mic 🎤</button></div>
+    <h2>Happy Birthday,<br><span class="glow">Akkov!</span></h2>
+    <p>Today the universe got one more reason to sparkle — <b>you</b>.</p>
+    <div class="panel"><p>May your day be full of laughter, lovely surprises, good food and all the happiness you truly deserve, Gopika ka! 💜</p></div>
+    <p class="small">P.S. Calories don't count on birthdays. I checked. (I did not.) 😂</p>
+  </section>
+
+  <section class="scene" data-scene="2">
+    <div class="kicker">not by blood, but by heart</div>
+    <div class="symbol">🌙</div>
+    <h2>Some bonds are<br><span class="script">chosen by the heart.</span></h2>
+    <div class="panel"><p>In my heart, you're someone I happily call <b>Akkov</b>. We may not have had many long conversations, but respect and affection don't always need a thousand words.</p><p class="glow">I'm genuinely happy to have you as my sister, Gopika ka.</p></div>
+  </section>
+
+  <section class="scene" data-scene="3">
+    <div class="kicker">official sister report</div>
+    <div class="symbol">🤣</div>
+    <h2>Things you should know<br>about being my Akkov</h2>
+    <div class="panel">
+      <p>✦ I wait for your reaction like it's a movie release. One 🙂 from you and my day is complete. 🤣</p>
+      <p>✦ We may not talk every day, but my Instagram share button clearly remembers you. 😂</p>
+      <p>✦ Official sister rule: please continue smiling at my reels. Your little brother needs encouragement! 😜</p>
+    </div>
+    <p class="small">Terms & conditions: unlimited reels, occasional smiley reviews, and lifetime sibling respect. 💜</p>
+  </section>
+
+  <section class="scene" data-scene="4">
+    <div class="kicker">seven little reminders</div>
+    <h2>Why you're special</h2>
+    <p>Not a ranking. Just seven things worth celebrating.</p>
+    <div class="reasons">
+      <div class="reason">💪 <b>Your dedication</b> — truly admirable</div>
+      <div class="reason">🦋 Your courage and bravery</div>
+      <div class="reason">🎁 The thoughtful surprise you planned for Mom and Dad</div>
+      <div class="reason">🏡 Managing home responsibilities after a full workday</div>
+      <div class="reason">🌷 Your caring and thoughtful nature</div>
+      <div class="reason">😊 Your little smiley replies to my reels</div>
+      <div class="reason">💜 The sister I respect and admire</div>
+    </div>
+  </section>
+
+  <section class="scene" data-scene="5">
+    <div class="kicker">a little note from my heart</div>
+    <div class="symbol">💌</div>
+    <h2>Something I want you to know</h2>
+    <div class="panel letter">
+      Dear Gopika ka,<br><br>
+      We haven't had lots of conversations, and we've met in person only at your wedding. But even from the little I know about you, there are things I genuinely admire.<br><br>
+      Your dedication, your courage, and the way you manage your work and home responsibilities show how strong and committed you are. The thoughtful surprises you create for the people around you are such lovely gestures. It says a lot about the care you have for the people around you.<br><br>
+      I may mostly appear in your Instagram inbox with random reels 😂, and you may reply with just one smiley — but please know that behind those silly little interactions is genuine respect and affection from your younger brother.<br><br>
+      I hope you keep being brave, keep growing, and never forget to make time for your own happiness too. You deserve appreciation, rest, laughter and every good thing life has to offer.<br><br>
+      <span class="glow">I'm happy to call you my Akkov.</span>
+      <div class="sign">With lots of love 💜</div>
+    </div>
+  </section>
+
+  <section class="scene" data-scene="6">
+    <div class="kicker">make a wish, Akkov</div>
+    <div class="stage" id="lanternStage"><div class="lantern">🏮</div></div><button class="primary" style="margin:6px 0 4px" onclick="releaseWish(this)">Release your wish ✨</button><p class="small" id="wishNote" style="margin:8px auto 18px">Drag the lantern to turn it, then tap when you're ready. 🌌</p>
+    <h2>A wish for your new year</h2>
+    <p>Wishing you and Samuel mama a married life filled with companionship, patience, laughter, understanding and beautiful memories. May you both keep supporting each other's dreams and celebrating every little win together.</p>
+    <div class="panel"><p class="script">May your home be filled with peace,<br>your days with joy,<br>and your future with blessings.</p></div>
+    
+    
+  </section>
+
+  <section class="scene" data-scene="7">
+    <div class="kicker">one last thing...</div>
+    <div class="symbol">💜</div>
+    <h1>Forever my<br>Akkov.</h1>
+    <p>Okay, jokes aside... one sincere message from your little brother. 💜</p>
+    <div class="panel">
+      <p class="script">Akkov, one thing I want you to know...</p>
+      <p style="font-family:'Cormorant Garamond',serif;font-size:1.55rem;line-height:1.65;color:#fff">
+        I may not be the brother who calls you every day...
+      </p>
+      <p>I'm probably the one who appears in your Instagram inbox with a random reel and waits for that legendary smiley reaction. 😂</p>
+      <p>But I truly respect you, Gopika ka. I admire your dedication, your bravery, and the love you show through your actions — especially the thoughtful surprises you create for the people around you and the way you keep going even after a long day at work.</p>
+      <p>As you begin this beautiful chapter with Samuel mama, I wish you both a life full of respect, laughter, patience and happiness. May you always find strength in each other and reasons to smile together.</p>
+      <p>And please remember to take care of yourself too. The person who works hard and looks after everyone deserves to be looked after and appreciated as well.</p>
+      <p><span class="glow">I may be your little brother in the most unofficial way, but my respect and good wishes for you are absolutely genuine.</span></p>
+      <p>Keep smiling, keep shining, Akkov. And yes… please don't stop reacting to my reels. A smiley is acceptable. A laughing emoji is preferred. 🤣</p>
+      <h2 class="glow" style="font-size:2.5rem;margin-top:20px">Happy Birthday, Gopika ka! 🎂</h2>
+      <p class="small">With respect, affection and a lifetime supply of random reels — your little brother. 💜</p>
+    </div>
+    <button class="primary" onclick="restart()">Replay our little universe ↻</button>
+    <div class="secret" id="secret"><p class="script">And if you ever forget how special you are, come back here. Your little brother will remind you. Always. 💜</p></div>
+    <button class="secondary" style="margin-top:14px" onclick="document.getElementById('secret').classList.toggle('show')">A tiny hidden message ♡</button>
+  </section>
+</main>
+
+<nav class="controls" aria-label="Story controls">
+  <button class="secondary" onclick="previous()">← Previous</button>
+  <button class="secondary" onclick="restart()">↻ Replay</button>
+  <button class="secondary" onclick="skip()">Skip »</button>
+  <button class="secondary" id="musicBtn" onclick="toggleMusic()">♫ Music: Off</button>
+  <button class="secondary next" id="nextBtn" onclick="next()">Next →</button>
+</nav>
+
+<script>
+const scenes=[...document.querySelectorAll('.scene')];
+let current=0, audioCtx=null, musicOn=false, musicTimer=null;
+const progress=document.getElementById('progress');
+function showScene(n){
+ current=Math.max(0,Math.min(scenes.length-1,n));
+ scenes.forEach((s,i)=>s.classList.toggle('active',i===current));
+ document.getElementById('sceneCount').textContent=`A little journey · ${String(current+1).padStart(2,'0')} / 08`;
+ progress.style.width=((current+1)/scenes.length*100)+'%';
+ document.getElementById('nextBtn').textContent=current===scenes.length-1?'At the beginning ↑':'Next →';
+ window.scrollTo({top:0,behavior:'smooth'});
+ if(current===7) burstHearts();
+}
+function next(){if(current<scenes.length-1)showScene(current+1);else showScene(0)}
+function previous(){showScene(current-1)}
+function skip(){showScene(scenes.length-1)}
+function restart(){showScene(0);document.getElementById('secret').classList.remove('show')}
+function burstHearts(){
+ for(let i=0;i<16;i++){setTimeout(()=>{const h=document.createElement('div');h.className='heart';h.textContent=['💜','✨','💖','🌟'][Math.floor(Math.random()*4)];h.style.left=(5+Math.random()*90)+'vw';h.style.bottom='0';h.style.setProperty('--dx',(Math.random()*160-80)+'px');document.body.appendChild(h);setTimeout(()=>h.remove(),3000)},i*90)}
+}
+function releaseWish(btn){
+ btn.textContent='Wish released ✨';btn.disabled=true;
+ document.getElementById('wishNote').textContent='Sending a little love into the universe... 💜';
+ const lantern=document.querySelector('.scene[data-scene="6"] .lantern');
+ lantern.animate([{transform:'translateY(0) scale(1)',opacity:1},{transform:'translateY(-170px) scale(.65)',opacity:0}],{duration:2400,easing:'ease-in',fill:'forwards'});
+ setTimeout(()=>{document.getElementById('wishNote').textContent='May it find its way to you, beautiful soul. 🌠'},2400);
+}
+function toggleMusic(){
+ if(!musicOn){
+  try{
+   audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+   const notes=[261.63,329.63,392,329.63,293.66,349.23,440,349.23];let idx=0;
+   function play(){
+    if(!musicOn)return;
+    const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+    osc.type='sine';osc.frequency.value=notes[idx++%notes.length];
+    gain.gain.setValueAtTime(.0001,audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.035,audioCtx.currentTime+.12);
+    gain.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+1.15);
+    osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+1.2);
+   }
+   musicOn=true;play();musicTimer=setInterval(play,1250);
+   document.getElementById('musicBtn').textContent='♫ Music: On';
+  }catch(e){document.getElementById('musicBtn').textContent='♫ Audio unavailable'}
+ }else{
+  musicOn=false;clearInterval(musicTimer);if(audioCtx)audioCtx.close();
+  document.getElementById('musicBtn').textContent='♫ Music: Off';
+ }
+}
+const sky=document.getElementById('sky');
+for(let i=0;i<95;i++){const s=document.createElement('i');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.animationDelay=(Math.random()*4)+'s';s.style.animationDuration=(2+Math.random()*4)+'s';sky.appendChild(s)}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')previous()});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+if(typeof THREE==='undefined')return;
+const cv=document.createElement('canvas');
+cv.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none';
+document.body.insertBefore(cv,document.body.firstChild);
+let r;try{r=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true})}catch(e){return}
+r.setPixelRatio(Math.min(devicePixelRatio,1.5));
+const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(60,1,.1,100);cam.position.z=7;
+scene.add(new THREE.AmbientLight(0xb8a6ff,.7));
+const L1=new THREE.PointLight(0xa77bff,2.2,40);L1.position.set(-6,4,4);scene.add(L1);
+const L2=new THREE.PointLight(0xf3d59a,2,40);L2.position.set(6,-3,4);scene.add(L2);
+const world=new THREE.Group();scene.add(world);
+// stars
+const N=1400,p=new Float32Array(N*3);
+for(let i=0;i<N;i++){p[i*3]=(Math.random()-.5)*60;p[i*3+1]=(Math.random()-.5)*40;p[i*3+2]=-Math.random()*45+8}
+const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(p,3));
+const stars=new THREE.Points(sg,new THREE.PointsMaterial({color:0xe6dcff,size:.07,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false}));
+world.add(stars);
+// heart geometry
+const s=new THREE.Shape();
+s.moveTo(25,25);s.bezierCurveTo(25,25,20,0,0,0);s.bezierCurveTo(-30,0,-30,35,-30,35);
+s.bezierCurveTo(-30,55,-10,77,25,95);s.bezierCurveTo(60,77,80,55,80,35);
+s.bezierCurveTo(80,35,80,0,50,0);s.bezierCurveTo(35,0,25,25,25,25);
+const hg=new THREE.ExtrudeGeometry(s,{depth:18,bevelEnabled:true,bevelThickness:6,bevelSize:5,bevelSegments:5,curveSegments:24});
+hg.center();hg.scale(.012,-.012,.012);
+const hearts=[],cols=[0x9b78ff,0xc79bff,0xf3d59a,0xff9ccf];
+for(let i=0;i<20;i++){
+ const m=new THREE.Mesh(hg,new THREE.MeshStandardMaterial({color:cols[i%4],roughness:.25,metalness:.55,emissive:cols[i%4],emissiveIntensity:.18}));
+ const a=Math.random()*Math.PI*2,rad=3+Math.random()*7;
+ m.position.set(Math.cos(a)*rad,(Math.random()-.5)*9,-2-Math.random()*16);
+ m.userData={sp:.2+Math.random()*.5,ph:Math.random()*6,sc:.5+Math.random()*1.1,base:m.position.clone()};
+ m.scale.setScalar(m.userData.sc);world.add(m);hearts.push(m);
+}
+// golden rings
+const rings=[];
+for(let i=0;i<3;i++){
+ const t=new THREE.Mesh(new THREE.TorusGeometry(5+i*2.2,.025,12,160),new THREE.MeshBasicMaterial({color:i==1?0xf3d59a:0xb99aff,transparent:true,opacity:.45}));
+ t.position.z=-9-i*2;t.rotation.x=1+i*.4;world.add(t);rings.push(t);
+}
+// gold dust
+const D=220,dp=new Float32Array(D*3);
+for(let i=0;i<D;i++){dp[i*3]=(Math.random()-.5)*20;dp[i*3+1]=(Math.random()-.5)*14;dp[i*3+2]=(Math.random()-.5)*10}
+const dg=new THREE.BufferGeometry();dg.setAttribute('position',new THREE.BufferAttribute(dp,3));
+const dust=new THREE.Points(dg,new THREE.PointsMaterial({color:0xf3d59a,size:.05,transparent:true,opacity:.7,blending:THREE.AdditiveBlending,depthWrite:false}));
+scene.add(dust);
+function size(){const w=innerWidth,h=innerHeight;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+size();addEventListener('resize',size);
+let mx=0,my=0,tY=0,tZ=7,pulse=0;
+addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+const prev=showScene;
+showScene=function(n){prev(n);tY=current*.5;tZ=7-(current%3)*.9;pulse=1;
+ const tint=[0x9b78ff,0xf3d59a,0xc79bff,0xff9ccf,0x9b78ff,0xf3d59a,0xf3d59a,0xff9ccf][current];L1.color.setHex(tint)};
+const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const clock=new THREE.Clock();
+(function loop(){
+ requestAnimationFrame(loop);
+ const t=clock.getElapsedTime()*(calm?.2:1);pulse*=.95;
+ world.rotation.y+=(tY-world.rotation.y)*.03;
+ world.rotation.z=Math.sin(t*.15)*.05;
+ cam.position.x+=(mx*2-cam.position.x)*.04;cam.position.y+=(-my*1.4-cam.position.y)*.04;
+ cam.position.z+=(tZ-cam.position.z)*.03;cam.lookAt(0,0,-4);
+ hearts.forEach(h=>{const d=h.userData;
+  h.rotation.y=t*d.sp+d.ph;h.rotation.x=Math.sin(t*.5+d.ph)*.3;
+  h.position.y=d.base.y+Math.sin(t*d.sp*2+d.ph)*.7;
+  h.scale.setScalar(d.sc*(1+pulse*.35*Math.sin(d.ph)))});
+ rings.forEach((g,i)=>{g.rotation.z=t*(.12+i*.06)*(i%2?-1:1);g.rotation.y=Math.sin(t*.2+i)*.4});
+ stars.rotation.y=t*.01;dust.rotation.y=-t*.04;dust.position.y=Math.sin(t*.3)*.3;
+ L1.position.x=Math.sin(t*.6)*7;L2.position.x=Math.cos(t*.5)*7;
+ r.render(scene,cam);
+})();
+})();
+</script>
+<script>
+(function(){
+if(typeof THREE==='undefined')return;
+const $=id=>document.getElementById(id);
+function mk(id,h,camZ,camY){
+ const el=$(id),c=document.createElement('canvas');
+ c.style.cssText='width:100%;height:min('+h+'px,40vh);display:block;touch-action:pan-y;cursor:grab';
+ let rr;try{rr=new THREE.WebGLRenderer({canvas:c,alpha:true,antialias:true})}catch(e){return null}
+ rr.setPixelRatio(Math.min(devicePixelRatio,1.5));el.innerHTML='';el.appendChild(c);
+ const sc=new THREE.Scene(),cm=new THREE.PerspectiveCamera(40,1,.1,100);cm.position.set(0,camY,camZ);cm.lookAt(0,camY*.4,0);
+ const o={c,rr,sc,cm,w:0,rot:0,vel:0,moved:0};let down=false,lx=0;
+ c.addEventListener('pointerdown',e=>{down=true;lx=e.clientX;o.moved=0;c.setPointerCapture(e.pointerId)});
+ c.addEventListener('pointermove',e=>{if(down){o.vel=(e.clientX-lx)*.004;o.rot+=(e.clientX-lx)*.01;o.moved+=Math.abs(e.clientX-lx);lx=e.clientX}});
+ addEventListener('pointerup',()=>down=false);
+ o.fit=()=>{const w=c.clientWidth,hh=c.clientHeight;if(w&&hh&&(w!==o.w||hh!==o.h)){o.w=w;o.h=hh;rr.setSize(w,hh,false);const a=w/hh;cm.aspect=a;cm.position.z=camZ*Math.max(1,1.3/a);cm.lookAt(0,camY*.4,0);cm.updateProjectionMatrix()}};
+ return o;
+}
+function tex(st){const k=document.createElement('canvas');k.width=k.height=64;const x=k.getContext('2d'),g=x.createRadialGradient(32,32,0,32,32,32);st.forEach(s=>g.addColorStop(s[0],s[1]));x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(k)}
+const flameTex=tex([[0,'rgba(255,250,210,1)'],[.25,'rgba(255,200,90,.95)'],[.6,'rgba(255,120,50,.35)'],[1,'rgba(255,80,30,0)']]);
+const smokeTex=tex([[0,'rgba(225,215,240,.6)'],[1,'rgba(225,215,240,0)']]);
+const glowTex=tex([[0,'rgba(255,190,100,.9)'],[.4,'rgba(255,140,60,.35)'],[1,'rgba(255,120,40,0)']]);
+const M=(c,r,m)=>new THREE.MeshStandardMaterial({color:c,roughness:r==null?.5:r,metalness:m||0});
+
+/* ---------- CAKE ---------- */
+const C=mk('cakeStage',270,8,2.6);
+let cakeFrame=()=>{},lit=true,burst=0;
+if(C){
+ const g=new THREE.Group();g.position.y=-.4;C.sc.add(g);
+ C.sc.add(new THREE.AmbientLight(0xcbb8ff,.85));
+ const k1=new THREE.PointLight(0xa77bff,1.5,30);k1.position.set(-4,4,4);C.sc.add(k1);
+ const k2=new THREE.PointLight(0xff9ccf,1,30);k2.position.set(4,1,3);C.sc.add(k2);
+ const fire=new THREE.PointLight(0xffb060,1.6,6);fire.position.set(0,2.8,0);g.add(fire);
+ const cyl=(r,h,y,col,m)=>{const x=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,48),M(col,.35,m));x.position.y=y;g.add(x)};
+ cyl(2.15,.12,-.06,0xf3d59a,.7);cyl(1.7,.9,.45,0x8d65ed);cyl(1.15,.8,1.3,0xc79bff);
+ [[1.7,.9],[1.15,1.7]].forEach(a=>{const t=new THREE.Mesh(new THREE.TorusGeometry(a[0],.09,12,64),M(0xfff3ff,.3));t.rotation.x=Math.PI/2;t.position.y=a[1];g.add(t)});
+ for(let i=0;i<14;i++){const a=i/14*6.283,b=new THREE.Mesh(new THREE.SphereGeometry(.08,12,12),M(i%2?0xf3d59a:0xff9ccf,.3,.4));b.position.set(Math.cos(a)*1.7,.98,Math.sin(a)*1.7);g.add(b)}
+ const flames=[];
+ for(let i=0;i<5;i++){
+  const a=i/5*6.283,x=Math.cos(a)*.6,z=Math.sin(a)*.6;
+  const cd=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.55,12),M(i%2?0xffd1e8:0xfff3ff,.4));cd.position.set(x,1.975,z);g.add(cd);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flameTex,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+  s.position.set(x,2.5,z);g.add(s);flames.push({s,x,y:2.5,z,k:1,d:0,sm:0});
+ }
+ const smoke=[],conf=[],cols=[0xf3d59a,0xc79bff,0xff9ccf,0x9b78ff,0xffffff];
+ const puff=f=>{for(let i=0;i<5;i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:smokeTex,transparent:true,depthWrite:false}));s.position.set(f.x+(Math.random()-.5)*.1,2.3,f.z+(Math.random()-.5)*.1);s.scale.setScalar(.25);s.userData={l:-i*.15,ph:Math.random()*6};g.add(s);smoke.push(s)}};
+ const confetti=()=>{for(let i=0;i<110;i++){const m=new THREE.Mesh(new THREE.PlaneGeometry(.12,.07),new THREE.MeshBasicMaterial({color:cols[i%5],side:THREE.DoubleSide}));m.position.set(0,2.4,0);m.userData={v:new THREE.Vector3((Math.random()-.5)*5,3+Math.random()*3,(Math.random()-.5)*5),l:0,s:new THREE.Vector3(Math.random()*8,Math.random()*8,Math.random()*8)};C.sc.add(m);conf.push(m)}};
+ const note=t=>{$('blowNote').textContent=t};
+ const blow=()=>{if(!lit)return;lit=false;flames.forEach((f,i)=>f.d=i*.14);$('blowBtn').textContent='Relight the candles 🕯️';note('Wish sealed... 🌠')};
+ const relight=()=>{flames.forEach((f,i)=>{f.k=1;f.sm=0});lit=true;burst=0;$('blowBtn').textContent='Blow the candles 🌬️';note('Make a wish first... then blow! ✨')};
+ $('blowBtn').onclick=()=>lit?blow():relight();
+ C.c.addEventListener('click',()=>{if(C.moved<6)blow()});
+ $('micBtn').onclick=async()=>{
+  if(!lit)return;
+  try{
+   const st=await navigator.mediaDevices.getUserMedia({audio:true}),ac=new (window.AudioContext||window.webkitAudioContext)(),an=ac.createAnalyser();
+   an.fftSize=512;ac.createMediaStreamSource(st).connect(an);const b=new Uint8Array(an.fftSize);let n=0;note('Blow gently into your mic... 🎤');
+   (function chk(){
+    if(!lit){st.getTracks().forEach(t=>t.stop());ac.close();return}
+    an.getByteTimeDomainData(b);let m=0;for(const v of b)m+=Math.abs(v-128);m/=b.length;
+    n=m>12?n+1:0;if(n>7)blow();requestAnimationFrame(chk);
+   })();
+  }catch(e){note('Mic unavailable, just tap the cake 💜')}
+ };
+ cakeFrame=(dt,t)=>{
+  g.rotation.y=C.rot;C.rot+=.003+C.vel;C.vel*=.92;
+  let out=0,sum=0;
+  flames.forEach((f,i)=>{
+   if(!lit){f.d-=dt;if(f.d<=0)f.k=Math.max(0,f.k-dt*2.2)}
+   const k=f.k,fl=1+Math.sin(t*18+i*2)*.08+Math.random()*.05;sum+=k;
+   f.s.scale.set(.42*fl*(.4+.6*k),.62*fl*k,1);
+   f.s.position.set(f.x+(1-k)*.25+Math.sin(t*9+i)*.012*k,f.y+.06,f.z);
+   f.s.material.opacity=Math.min(1,k*1.5);
+   if(k===0){out++;if(!f.sm){f.sm=1;puff(f)}}
+  });
+  fire.intensity=1.6*sum/flames.length*(1+Math.sin(t*20)*.08);
+  if(!lit&&out===flames.length&&!burst){burst=1;confetti();note('Happy Birthday, Akkov! Your wish is on its way 💜')}
+  for(let i=smoke.length-1;i>=0;i--){const s=smoke[i],u=s.userData;u.l+=dt;if(u.l<0){s.material.opacity=0;continue}
+   s.position.y+=dt*.7;s.position.x+=Math.sin(t*2+u.ph)*dt*.25;s.scale.addScalar(dt*.45);s.material.opacity=Math.max(0,.6*(1-u.l/2.2));
+   if(u.l>2.2){g.remove(s);smoke.splice(i,1)}}
+  for(let i=conf.length-1;i>=0;i--){const m=conf[i],u=m.userData;u.l+=dt;u.v.y-=7*dt;m.position.addScaledVector(u.v,dt);
+   m.rotation.x+=u.s.x*dt;m.rotation.y+=u.s.y*dt;m.rotation.z+=u.s.z*dt;
+   if(u.l>3.2||m.position.y<-3){C.sc.remove(m);conf.splice(i,1)}}
+ };
+}
+
+/* ---------- LANTERN ---------- */
+const Lt=mk('lanternStage',300,9,.5);
+let lanFrame=()=>{};
+if(Lt){
+ const S=Lt.sc;S.add(new THREE.AmbientLight(0xffd9b0,.35));
+ const mat=new THREE.MeshStandardMaterial({color:0xffb347,emissive:0xff8a2a,emissiveIntensity:.9,side:THREE.DoubleSide,transparent:true,opacity:.92,roughness:.6});
+ const ring=M(0x7a1f2b,.5,.3),gold=M(0xf3d59a,.3,.6);
+ const gBody=new THREE.CylinderGeometry(.75,.55,1.5,8,1,true),gTop=new THREE.CylinderGeometry(.8,.8,.09,8),gBot=new THREE.CylinderGeometry(.58,.58,.09,8);
+ const gmat=new THREE.SpriteMaterial({map:glowTex,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:.7});
+ const lantern=sc=>{const g=new THREE.Group();g.add(new THREE.Mesh(gBody,mat));
+  const t=new THREE.Mesh(gTop,ring);t.position.y=.76;g.add(t);const b=new THREE.Mesh(gBot,ring);b.position.y=-.76;g.add(b);
+  const gl=new THREE.Sprite(gmat);gl.scale.setScalar(5);g.add(gl);g.scale.setScalar(sc);return g};
+ const main=lantern(1);S.add(main);
+ const light=new THREE.PointLight(0xff9a3c,2.2,8);main.add(light);
+ const tas=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,.6,6),gold);tas.position.y=-1.1;main.add(tas);
+ const ball=new THREE.Mesh(new THREE.SphereGeometry(.09,12,12),gold);ball.position.y=-1.42;main.add(ball);
+ const sp=new Float32Array(600);for(let i=0;i<200;i++){sp[i*3]=(Math.random()-.5)*18;sp[i*3+1]=(Math.random()-.5)*11;sp[i*3+2]=-6-Math.random()*8}
+ const sgm=new THREE.BufferGeometry();sgm.setAttribute('position',new THREE.BufferAttribute(sp,3));
+ S.add(new THREE.Points(sgm,new THREE.PointsMaterial({color:0xe6dcff,size:.06,transparent:true,opacity:.8,depthWrite:false})));
+ const bg=[];
+ for(let i=0;i<12;i++){const m=lantern(.2+Math.random()*.1);m.visible=false;S.add(m);bg.push({m,d:.5+i*.4,x:(Math.random()-.5)*6.5,z:-4-Math.random()*5,v:Math.random()*.4,ph:Math.random()*6})}
+ Lt.rel=0;
+ lanFrame=(dt,t)=>{
+  if(!Lt.rel){main.position.set(0,Math.sin(t*1.5)*.1,0);main.rotation.y=Lt.rot;Lt.rot+=.004+Lt.vel;Lt.vel*=.92;main.rotation.z=Math.sin(t*1.1)*.04;
+   light.intensity=2.2+Math.sin(t*7)*.25+Math.random()*.15}
+  else{const p=(performance.now()-Lt.rel)/1000;
+   main.position.set(Math.sin(p*1.6)*.35*Math.min(p,2),p*.5+.22*p*p,-p*1.1);main.rotation.y+=dt*.6;main.rotation.z=Math.sin(p*1.6)*.12;main.visible=p<6;
+   bg.forEach(b=>{const q=p-b.d;if(q>0){b.m.visible=true;b.m.position.set(b.x+Math.sin(q*1.2+b.ph)*.4,-4.5+q*(.6+b.v),b.z)}})}
+ };
+ const origRelease=releaseWish;
+ releaseWish=function(btn){
+  if(Lt.rel)return;
+  btn.textContent='Wish released ✨';btn.disabled=true;Lt.rel=performance.now();
+  $('wishNote').textContent='Sending a little love into the universe... 💜';
+  setTimeout(()=>{$('wishNote').textContent='May it find its way to you, beautiful soul. 🌠'},3000);
+  setTimeout(()=>{btn.disabled=false;btn.textContent='Light another lantern 🏮';
+   btn.onclick=function(){Lt.rel=0;main.visible=true;bg.forEach(b=>b.m.visible=false);btn.textContent='Release your wish ✨';$('wishNote').textContent='Drag the lantern to turn it, then tap when you are ready. 🌌';btn.onclick=function(){releaseWish(this)}}},6500);
+ };
+}
+
+const clk=new THREE.Clock();
+(function loop(){
+ requestAnimationFrame(loop);
+ const dt=Math.min(clk.getDelta(),.05),t=clk.elapsedTime;
+ if(current===1&&C){C.fit();cakeFrame(dt,t);C.rr.render(C.sc,C.cm)}
+ if(current===6&&Lt){Lt.fit();lanFrame(dt,t);Lt.rr.render(Lt.sc,Lt.cm)}
+})();
+})();
+</script>
+</body>
+</html>
